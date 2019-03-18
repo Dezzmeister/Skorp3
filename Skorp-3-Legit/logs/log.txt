@@ -1,0 +1,6 @@
+20:02:33.381	Logger created.
+20:02:33.382	Starting WindowTest
+20:02:35.263	Escape key was pressed
+20:02:35.264	Quitting GLFW
+20:02:35.265	QUIT message received by MessageTest.
+20:02:35.266	MessageTest is quitting
