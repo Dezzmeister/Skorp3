@@ -1,5 +1,5 @@
-14:15:28.118	Logger created.
-14:15:28.133	Starting WindowTest
-14:15:29.803	Quitting GLFW
-14:15:29.803	QUIT message received by MessageTest.
-14:15:29.803	MessageTest is quitting
+14:30:44.873	Logger created.
+14:30:44.886	Starting WindowTest
+14:30:46.686	Quitting GLFW
+14:30:46.687	QUIT message received by MessageTest.
+14:30:46.688	MessageTest is quitting
