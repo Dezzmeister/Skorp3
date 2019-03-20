@@ -2,7 +2,6 @@ package com.dezzy.skorp3.messaging.meta;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -11,10 +10,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.regex.Matcher;
 
 import com.dezzy.skorp3.logging.Logger;
@@ -28,6 +25,52 @@ public class MessagingAnnotationProcessor {
 		String classRoot = "target\\classes\\";
 		Class[] classes = loadClasses(classRoot, paths);
 		CallbackUserMetaStruct[] callbackUserInfo = getCallbackUserMetaInfo(classes);
+		System.out.println(callbackUserInfo.length);
+	}
+	
+	private static String constructFileString(CallbackUserMetaStruct[] cbUserInfo) {
+		StringBuilder builder = new StringBuilder("Skorp 3 Messaging System Outline");
+		
+		return builder.toString();
+	}
+	
+	private static SenderUserMetaStruct[] getSenderUserMetaInfo(final Class[] classes) {
+		SenderUserMetaStruct[] senderUsers = new SenderUserMetaStruct[classes.length];
+		
+		for (int i = 0; i < senderUsers.length; i++) {
+			senderUsers[i] = new SenderUserMetaStruct();
+			senderUsers[i].classType = classes[i];
+			senderUsers[i].senders = findSenderAnnotations(classes[i]);
+		}
+		
+		//TODO: Write filter function
+		return senderUsers;
+	}
+	
+	private static SenderMetaStruct[] findSenderAnnotations(final Class clazz) {
+		Method[] methods = clazz.getDeclaredMethods();
+		
+		List<Sends> sendsAnnotations = new ArrayList<Sends>();
+		List<SendsTo> toAnnotations = new ArrayList<SendsTo>();
+		
+		for (int i = 0; i < methods.length; i++) {
+			Method method = methods[i];
+			Sends sendsAnnotation = method.getAnnotation(Sends.class);
+			
+			if (sendsAnnotation != null) {
+				sendsAnnotations.add(sendsAnnotation);
+				
+				SendsTo toAnnotation = method.getAnnotation(SendsTo.class);
+				if (toAnnotation != null) {
+					toAnnotations.add(toAnnotation);
+				} else {
+					toAnnotations.add(null);
+				}
+			}
+		}
+		
+		//TODO: finish this
+		return null;
 	}
 	
 	private static CallbackUserMetaStruct[] getCallbackUserMetaInfo(final Class[] classes) {
@@ -36,31 +79,30 @@ public class MessagingAnnotationProcessor {
 		for (int i = 0; i < cbUsers.length; i++) {
 			cbUsers[i] = new CallbackUserMetaStruct();
 			cbUsers[i].classType = classes[i];
-			cbUsers[i].callbacks = findAnnotations(classes[i]);
-			//TODO: Remove this test
-			if (cbUsers[i].callbacks.length != 0) {
-				System.out.println(cbUsers[i].callbacks[0].handlesWhat);
-				System.out.println(classes[i]);
-			}
-			//
+			cbUsers[i].callbacks = findCallbackAnnotations(classes[i]);
 		}
 		
-		return cbUsers;
+		return filterMessageUsers(cbUsers);
 	}
 	
-	private static CallbackMetaStruct[] findAnnotations(final Class<?> clazz) {
-		Method[] methods = clazz.getMethods();
-		List<Annotation> handlesAnnotations = new ArrayList<Annotation>();
-		List<Annotation> forAnnotations = new ArrayList<Annotation>();
+	private static CallbackUserMetaStruct[] filterMessageUsers(final CallbackUserMetaStruct[] callbackUsers) {
+		return Arrays.stream(callbackUsers).filter(cb -> cb.callbacks.length != 0).toArray(CallbackUserMetaStruct[]::new);
+	}
+	
+	private static CallbackMetaStruct[] findCallbackAnnotations(final Class<?> clazz) {
+		Method[] methods = clazz.getDeclaredMethods();
+		
+		List<Handles> handlesAnnotations = new ArrayList<Handles>();
+		List<HandlesFor> forAnnotations = new ArrayList<HandlesFor>();
 		
 		for (int i = 0; i < methods.length; i++) {
 			Method method = methods[i];
-			Annotation handlesAnnotation = method.getAnnotation(Handles.class);
+			Handles handlesAnnotation = method.getAnnotation(Handles.class);
 			
 			if (handlesAnnotation != null) {
 				handlesAnnotations.add(handlesAnnotation);
 				
-				Annotation forAnnotation = method.getAnnotation(For.class);
+				HandlesFor forAnnotation = method.getAnnotation(HandlesFor.class);
 				if (forAnnotation != null) {
 					forAnnotations.add(forAnnotation);
 				} else {
@@ -69,15 +111,17 @@ public class MessagingAnnotationProcessor {
 			}
 		}
 		
-		return compileAnnotationLists(handlesAnnotations, forAnnotations);
+		return compileCallbackAnnotationLists(handlesAnnotations, forAnnotations);
 	}
 	
-	private static CallbackMetaStruct[] compileAnnotationLists(final List<Annotation> handlesAnnotations, final List<Annotation> forAnnotations) {
+	private static CallbackMetaStruct[] compileCallbackAnnotationLists(final List<Handles> handlesAnnotations, final List<HandlesFor> forAnnotations) {
 		CallbackMetaStruct[] cbInfo = new CallbackMetaStruct[handlesAnnotations.size()];
 		
 		for (int i = 0; i < cbInfo.length; i++) {
+			cbInfo[i] = new CallbackMetaStruct();
+			
 			cbInfo[i].handlesWhat = handlesAnnotations.get(i);
-			cbInfo[i].forWho = forAnnotations.get(i);
+			cbInfo[i].handlesWhatForWho = forAnnotations.get(i);
 		}
 		
 		return cbInfo;
@@ -158,12 +202,22 @@ public class MessagingAnnotationProcessor {
 	}
 	
 	private static class CallbackMetaStruct {
-		private Annotation handlesWhat;
-		private Annotation forWho;
+		private Handles handlesWhat;
+		private HandlesFor handlesWhatForWho;
 	}
 	
 	private static class CallbackUserMetaStruct {
 		private Class classType;
 		private CallbackMetaStruct[] callbacks;
+	}
+	
+	private static class SenderMetaStruct {
+		private Sends sendsWhat;
+		private SendsTo sendsWhatToWho;
+	}
+	
+	private static class SenderUserMetaStruct {
+		private Class classType;
+		private SenderMetaStruct[] senders;
 	}
 }

@@ -43,6 +43,8 @@ import org.lwjgl.system.MemoryStack;
 import com.dezzy.skorp3.logging.Logger;
 import com.dezzy.skorp3.messaging.Message;
 import com.dezzy.skorp3.messaging.MessageHandler;
+import com.dezzy.skorp3.messaging.meta.Sends;
+import com.dezzy.skorp3.messaging.meta.SendsTo;
 
 public class WindowTest implements Runnable {
 	private long window;
@@ -103,6 +105,8 @@ public class WindowTest implements Runnable {
 		glfwShowWindow(window);
 	}
 	
+	@Sends({"QUIT"})
+	@SendsTo({"Global"})
 	private void loop() {
 		GL.createCapabilities();
 		

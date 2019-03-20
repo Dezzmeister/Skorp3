@@ -1,20 +1,19 @@
 package com.dezzy.skorp3.messaging.meta;
 
 import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.RetentionPolicy.CLASS;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * Specifies the message handler that a callback function handles messages for.
- * 
+ * Specifies the messages that a method sends through a message handler.
  *
  * @author Joe Desmond
  * @see com.dezzy.skorp3.messaging.meta.Handles Handles
  */
-@Retention(CLASS)
+@Retention(RUNTIME)
 @Target(METHOD)
-public @interface For {
-	String value();
+public @interface Sends {
+	String[] value();
 }
