@@ -25,13 +25,57 @@ public class MessagingAnnotationProcessor {
 		String classRoot = "target\\classes\\";
 		Class[] classes = loadClasses(classRoot, paths);
 		CallbackUserMetaStruct[] callbackUserInfo = getCallbackUserMetaInfo(classes);
-		System.out.println(callbackUserInfo.length);
+		SenderUserMetaStruct[] senderUserInfo = getSenderUserMetaInfo(classes);
+		List<OutlineFileEntry> fileEntries = compileOutlineFileEntries(callbackUserInfo, senderUserInfo);
+		System.out.println(senderUserInfo.length);
 	}
 	
-	private static String constructFileString(CallbackUserMetaStruct[] cbUserInfo) {
-		StringBuilder builder = new StringBuilder("Skorp 3 Messaging System Outline");
+	private static String buildOutlineFile(final List<OutlineFileEntry> entries) {
+		StringBuilder sb = new StringBuilder("Skorp 3 Messaging Outline\n\n");
 		
-		return builder.toString();
+		for (OutlineFileEntry entry : entries) {
+			sb.append("Class " + entry.classType.getSimpleName() + ":\n\t");
+			//TODO: Write this
+		}
+		
+		return sb.toString();
+	}
+	
+	//TODO: Write this
+	private static String getCallbackUserInfoString(final CallbackUserMetaStruct info) {
+		String out = "";
+		
+		return out;
+	}
+	
+	private static List<OutlineFileEntry> compileOutlineFileEntries(final CallbackUserMetaStruct[] cbUserInfo, final SenderUserMetaStruct[] senderUserInfo) {
+		List<OutlineFileEntry> entries = new ArrayList<OutlineFileEntry>();
+		
+		for (int i = 0; i < cbUserInfo.length; i++) {
+			OutlineFileEntry entry = new OutlineFileEntry(cbUserInfo[i].classType, cbUserInfo[i], null);
+			entries.add(entry);
+		}
+		
+		for (int i = 0; i < senderUserInfo.length; i++) {
+			OutlineFileEntry entry;
+			if ((entry = containsClassEntry(entries, senderUserInfo[i].classType)) != null) {
+				entry.senderUserInfo = senderUserInfo[i];
+			} else {
+				entry = new OutlineFileEntry(senderUserInfo[i].classType, null, senderUserInfo[i]);
+				entries.add(entry);
+			}
+		}
+		
+		return entries;
+	}
+	
+	private static OutlineFileEntry containsClassEntry(List<OutlineFileEntry> entries, Class classType) {
+		for (OutlineFileEntry entry : entries) {
+			if (entry.classType == classType) {
+				return entry;
+			}
+		}
+		return null;
 	}
 	
 	private static SenderUserMetaStruct[] getSenderUserMetaInfo(final Class[] classes) {
@@ -43,8 +87,11 @@ public class MessagingAnnotationProcessor {
 			senderUsers[i].senders = findSenderAnnotations(classes[i]);
 		}
 		
-		//TODO: Write filter function
-		return senderUsers;
+		return filterSenderUsers(senderUsers);
+	}
+	
+	private static SenderUserMetaStruct[] filterSenderUsers(final SenderUserMetaStruct[] senderUsers) {
+		return Arrays.stream(senderUsers).filter(user -> user.senders.length != 0).toArray(SenderUserMetaStruct[]::new);
 	}
 	
 	private static SenderMetaStruct[] findSenderAnnotations(final Class clazz) {
@@ -69,8 +116,20 @@ public class MessagingAnnotationProcessor {
 			}
 		}
 		
-		//TODO: finish this
-		return null;
+		return compileSenderAnnotationLists(sendsAnnotations, toAnnotations);
+	}
+	
+	private static SenderMetaStruct[] compileSenderAnnotationLists(final List<Sends> sendsAnnotations, final List<SendsTo> toAnnotations) {
+		SenderMetaStruct[] senderInfo = new SenderMetaStruct[sendsAnnotations.size()];
+		
+		for (int i = 0; i < senderInfo.length; i++) {
+			senderInfo[i] = new SenderMetaStruct();
+			
+			senderInfo[i].sendsWhat = sendsAnnotations.get(i);
+			senderInfo[i].sendsWhatToWho = toAnnotations.get(i);
+		}
+		
+		return senderInfo;
 	}
 	
 	private static CallbackUserMetaStruct[] getCallbackUserMetaInfo(final Class[] classes) {
@@ -199,6 +258,18 @@ public class MessagingAnnotationProcessor {
 		
 		//Replace backslashes with periods
 		return trimmed.replaceAll(Matcher.quoteReplacement("\\"), ".");
+	}
+	
+	private static class OutlineFileEntry {
+		private Class classType;
+		private CallbackUserMetaStruct cbUserInfo;
+		private SenderUserMetaStruct senderUserInfo;
+		
+		public OutlineFileEntry(final Class _classType, final CallbackUserMetaStruct _cbUserInfo, final SenderUserMetaStruct _senderUserInfo) {
+			classType = _classType;
+			cbUserInfo = _cbUserInfo;
+			senderUserInfo = _senderUserInfo;
+		}
 	}
 	
 	private static class CallbackMetaStruct {
