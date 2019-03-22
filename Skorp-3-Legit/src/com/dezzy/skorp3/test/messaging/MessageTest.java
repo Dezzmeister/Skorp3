@@ -22,8 +22,8 @@ public class MessageTest {
 	@Handles({"QUIT"})
 	@HandlesFor("Control")
 	private static void controlCallbackFunc(Message message) {
-		Logger.log(message.message + " message received by MessageTest.");
-		if (message.message.equals("QUIT")) {
+		Logger.log(message.messageText + " message received by MessageTest.");
+		if (message.messageText.equals("QUIT")) {
 			run = false;
 		}
 	}

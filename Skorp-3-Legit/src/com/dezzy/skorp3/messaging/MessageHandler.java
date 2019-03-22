@@ -47,6 +47,15 @@ public final class MessageHandler {
 	}
 	
 	/**
+	 * Registers a callback function for this message handler.
+	 * 
+	 * @param callback callback function
+	 */
+	public void registerCallback(final MessageCallbackFunc callback) {
+		messageReceivers.add(callback);
+	}
+	
+	/**
 	 * Dispatches a message to a message handler. All callback functions registered on the message handler will receive the message.
 	 * 
 	 * @param handlerName name of the message handler
@@ -59,6 +68,15 @@ public final class MessageHandler {
 		} else {
 			handler.messageReceivers.forEach(mcf -> mcf.handleMessage(message));
 		}
+	}
+	
+	/**
+	 * Dispatches a message to this message handler. All callback functions registered on this message handler will receive the message.
+	 * 
+	 * @param message message to send
+	 */
+	public void dispatch(final Message message) {
+		messageReceivers.forEach(mcf -> mcf.handleMessage(message));
 	}
 	
 	/**

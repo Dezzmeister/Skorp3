@@ -2,12 +2,8 @@ package com.dezzy.skorp3.meta;
 
 import com.dezzy.skorp3.messaging.meta.MessagingAnnotationProcessor;
 
-public class MetaUtilities {
+public class MetaUtilities extends RequiresForcedLoading {
 	static {
 		MessagingAnnotationProcessor.processMessagingAnnotations();
-	}
-	
-	public static void init() {
-		
 	}
 }

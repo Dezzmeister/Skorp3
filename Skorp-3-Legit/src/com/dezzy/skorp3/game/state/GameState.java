@@ -15,6 +15,7 @@ import java.util.Properties;
  * @author Joe Desmond
  */
 public enum GameState {
+	NONE(null),
 	INTRO(PropertyCreator.getIntroProperties()),
 	MAIN_MENU(PropertyCreator.getMainMenuProperties()), 
 	IN_GAME(PropertyCreator.getInGameProperties());

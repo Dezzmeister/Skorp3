@@ -1,8 +1,10 @@
 package com.dezzy.skorp3.game;
 
+import com.dezzy.skorp3.game.state.GameState;
 
 public class Game implements Runnable {
 	private volatile boolean isRunning = false;
+	private GameState currentState = GameState.INTRO;
 	
 	private void init() {
 		
