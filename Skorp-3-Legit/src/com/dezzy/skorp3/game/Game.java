@@ -1,13 +1,21 @@
 package com.dezzy.skorp3.game;
 
 import com.dezzy.skorp3.game.state.GameState;
+import com.dezzy.skorp3.game.state.StateUpdateObject;
+import com.dezzy.skorp3.messaging.Message;
+import com.dezzy.skorp3.messaging.MessageHandlerRegistry;
 
 public class Game implements Runnable {
 	private volatile boolean isRunning = false;
 	private GameState currentState = GameState.INTRO;
 	
 	private void init() {
-		
+		postNewState();
+	}
+	
+	private void postNewState() {
+		StateUpdateObject suo = new StateUpdateObject(currentState, currentState);
+		MessageHandlerRegistry.GAME_STATE_HANDLER.dispatch(new Message("STATE_UPDATE", suo));
 	}
 	
 	private void render(float delta) {
