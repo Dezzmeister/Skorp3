@@ -17,9 +17,20 @@ import java.util.regex.Matcher;
 
 import com.dezzy.skorp3.logging.Logger;
 
+/**
+ * Searches for messaging system annotations and generates an outline of the message system based on these annotations.
+ *
+ * @author Joe Desmond
+ * @see MessagingAnnotationProcessor#processMessagingAnnotations()
+ */
 @SuppressWarnings("rawtypes")
 public class MessagingAnnotationProcessor {
 	
+	/**
+	 * Locates {@link Handles}, {@link HandlesFor}, {@link Sends}, and {@link SendsTo} annotations in the compiled
+	 * class file system. Generates a file at "<i>meta/messaging-outline.txt</i>" outlining the messages that classes
+	 * and their functions handle/send.
+	 */
 	public static void processMessagingAnnotations() {
 		List<Path> paths = getClassfilePaths("target");
 		

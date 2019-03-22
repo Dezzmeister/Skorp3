@@ -7,10 +7,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * Specified the message handler that a method sends messages to. Should be used
+ * Specified the message handlers that a method sends messages to. Should be used
  * with {@link Sends}.
  * <p>
- * <b>NOTE:</b> Use "Global" to specify all message handlers.
+ * <b>NOTE:</b> Use "Global" to specify all message handlers (global dispatch).
  *
  * @author Joe Desmond
  * @see Handles
