@@ -33,17 +33,16 @@ import static org.lwjgl.opengl.GL11.glClearColor;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
-import java.awt.Point;
 import java.nio.IntBuffer;
 
+import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
-import org.lwjgl.glfw.GLFWKeyCallbackI;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
+import org.lwjgl.opengl.GL33;
 import org.lwjgl.system.MemoryStack;
 
-import com.dezzy.skorp3.game.input.MouseHandler;
 import com.dezzy.skorp3.logging.Logger;
 import com.dezzy.skorp3.messaging.Message;
 import com.dezzy.skorp3.messaging.MessageHandler;
@@ -52,10 +51,24 @@ import com.dezzy.skorp3.messaging.meta.SendsTo;
 
 public class WindowTest implements Runnable {
 	private long window;
+	private int vaoID;
+	private int vboID;
+	float[] vertices;
 	
 	@Override
 	public void run() {
 		Logger.log("Starting WindowTest");
+		
+		vaoID = createVAOID();
+		bindVAO(vaoID);
+		
+		vboID = createVBOID();
+		bindVBOBuffer(vboID);
+		vertices = new float[] {
+				-1.0f, -1.0f, 0.0f,
+				1.0f, -1.0f, 0.0f,
+				0.0f, 1.0f, 0.0f
+		};
 		
 		init();
 		loop();
@@ -68,7 +81,7 @@ public class WindowTest implements Runnable {
 	}
 	
 	private void init() {		
-		GLFWErrorCallback.createPrint(Logger.getLogger()).set();
+		GLFW.glfwSetErrorCallback(GLFWErrorCallback.createPrint(Logger.getLogger()).set());
 		
 		if (!glfwInit()) {
 			throw new IllegalStateException("Unable to initialize GLFW!");
@@ -114,6 +127,13 @@ public class WindowTest implements Runnable {
 	private void loop() {
 		GL.createCapabilities();
 		
+		GL33.glEnableVertexAttribArray(0);
+		sendVBOData(vertices);
+		GL33.glVertexAttribPointer(0, 3, GL33.GL_FLOAT, false, 0, 0);
+		
+		GL33.glDrawArrays(GL33.GL_TRIANGLES, 0, 3);
+		GL33.glDisableVertexAttribArray(0);
+		
 		glClearColor(0.0f, 1.0f, 0.0f, 0.0f);
 		
 		while (!glfwWindowShouldClose(window)) {
@@ -123,5 +143,30 @@ public class WindowTest implements Runnable {
 		}
 		Logger.log("Quitting GLFW");
 		MessageHandler.dispatchGlobal(new Message("QUIT", null));
+	}
+	
+	private int createVAOID() {
+		IntBuffer buffer = BufferUtils.createIntBuffer(1);
+		GL33.glGenVertexArrays(buffer);
+		
+		return buffer.get(0);
+	}
+	
+	private void bindVAO(int vaoID) {
+		GL33.glBindVertexArray(vaoID);
+	}
+	
+	private int createVBOID() {
+		IntBuffer buffer = BufferUtils.createIntBuffer(1);
+		GL33.glGenBuffers(buffer);
+		return buffer.get(0);
+	}
+	
+	private void bindVBOBuffer(int vboID) {
+		GL33.glBindBuffer(GL33.GL_ARRAY_BUFFER, vboID);
+	}
+	
+	private void sendVBOData(float[] vertices) {
+		GL33.glBufferData(GL33.GL_ARRAY_BUFFER, vertices, GL33.GL_STATIC_DRAW);
 	}
 }
