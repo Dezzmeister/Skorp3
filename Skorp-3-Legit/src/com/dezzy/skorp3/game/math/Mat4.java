@@ -1,6 +1,6 @@
 package com.dezzy.skorp3.game.math;
 
-import java.util.Arrays;
+import java.nio.FloatBuffer;
 import java.util.function.Consumer;
 
 public class Mat4 {
@@ -53,7 +53,11 @@ public class Mat4 {
 		return new Vec4(values[col], values[col + 4], values[col + 8], values[col + 12]);
 	}
 	
-	public void forEach(final Consumer<Float> floatConsumer) {
+	public void store(final FloatBuffer buf) {
+		forEach(buf::put);
+	}
+	
+	private void forEach(final Consumer<Float> floatConsumer) {
 		for (int i = 0; i < values.length; i++) {
 			floatConsumer.accept(values[i]);
 		}

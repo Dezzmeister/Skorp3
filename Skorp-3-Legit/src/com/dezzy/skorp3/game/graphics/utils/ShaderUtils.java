@@ -38,7 +38,7 @@ public class ShaderUtils {
 			infoLogLength = infoLogLengthPtr.get(0);
 		}
 		
-		Logger.log("Shader \"" + path + "\" compiled: " + GL33.glGetShaderi(shaderID, GL33.GL_COMPILE_STATUS));
+		Logger.log("Shader \"" + path + "\" compiled: " + yesno(GL33.glGetShaderi(shaderID, GL33.GL_COMPILE_STATUS)));
 		
 		if (infoLogLength > 0) {
 			String infoLog = GL33.glGetShaderInfoLog(shaderID);
@@ -54,10 +54,10 @@ public class ShaderUtils {
 		
 		Arrays.stream(shaderIDs).forEach(shaderID -> GL33.glAttachShader(programID, shaderID));
 		GL33.glLinkProgram(programID);
-		Logger.log("OpenGL program linked: " + GL33.glGetProgrami(programID, GL33.GL_LINK_STATUS));
+		Logger.log("OpenGL program linked: " + yesno(GL33.glGetProgrami(programID, GL33.GL_LINK_STATUS)));
 		
 		GL33.glValidateProgram(programID);
-		Logger.log("OpenGL program validated: " + GL33.glGetProgrami(programID, GL33.GL_VALIDATE_STATUS));
+		Logger.log("OpenGL program validated: " + yesno(GL33.glGetProgrami(programID, GL33.GL_VALIDATE_STATUS)));
 		
 		int infoLogLength;
 		
@@ -83,5 +83,9 @@ public class ShaderUtils {
 		});
 		
 		return programID;
+	}
+	
+	private static String yesno(int i) {
+		return (i == 1) ? "YES" : "NO";
 	}
 }

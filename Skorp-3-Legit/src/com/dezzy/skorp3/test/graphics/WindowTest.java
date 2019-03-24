@@ -53,6 +53,7 @@ import org.lwjgl.opengl.GLCapabilities;
 import org.lwjgl.system.MemoryStack;
 
 import com.dezzy.skorp3.game.graphics.utils.ShaderUtils;
+import com.dezzy.skorp3.game.graphics.utils.TransformUtils;
 import com.dezzy.skorp3.game.math.Mat4;
 import com.dezzy.skorp3.game.math.Vec4;
 import com.dezzy.skorp3.logging.Logger;
@@ -141,6 +142,8 @@ public class WindowTest implements Runnable {
 		Logger.log("OpenGL Version: " + GL11.glGetString(GL11.GL_VERSION));
 	}
 	
+	private FloatBuffer matBuf = BufferUtils.createFloatBuffer(16);
+	
 	@Sends({"QUIT"})
 	@SendsTo({"Global"})
 	private void loop() {
@@ -171,21 +174,44 @@ public class WindowTest implements Runnable {
 			e.printStackTrace();
 		}
 		
-		Mat4 mvp = MatrixTest.getTestMVP();
-		System.out.println(mvp.multiply(new Vec4(-1, -1, 0)));
-		FloatBuffer buf = BufferUtils.createFloatBuffer(16);
-		mvp.forEach(buf::put);
+		Mat4 projectionMatrix = TransformUtils.perspective((float)Math.PI / 4.0f, 1.0f, 0.01f, 100.0f);
+		/*
+		Mat4 viewMatrix = TransformUtils.lookAt(
+				new Vec4(4, 3, 3, 1),
+				new Vec4(0, 0, 0, 1),
+				new Vec4(0, 1, 0, 1)
+		);
+		*/
+		Mat4 viewMatrix = Mat4.IDENTITY;
 		
-		int matrixID = GL33.glGetUniformLocation(programID, "MVP");
+		Mat4 modelMatrix = TransformUtils.rotateZ(0.4f).multiply(TransformUtils.translate(0, 0, -4f));
 		
+		int mvpMatrixLocation = GL33.glGetUniformLocation(programID, "MVP");
+		
+		Mat4 mvpMatrix = Mat4.IDENTITY;
 		
 		glClearColor(1.0f, 1.0f, 0.0f, 0.0f);
-		GL33.glUseProgram(programID);
+		
+		float factor = 0;
 		
 		while (!glfwWindowShouldClose(window)) {
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			//modelMatrix = TransformUtils.rotateZ((factor += 0.01f));
 			
-			GL33.glUniformMatrix4fv(matrixID, false, buf);
+			mvpMatrix = projectionMatrix.multiply(viewMatrix).multiply(modelMatrix);
+			
+			/*
+			System.out.println("vec0: " + mvpMatrix.multiply(new Vec4(-1, -1, 0)));
+			System.out.println("vec1: " + mvpMatrix.multiply(new Vec4(1, -1, 0)));
+			System.out.println("vec2: " + mvpMatrix.multiply(new Vec4(0, 1, 0)));
+			*/
+			
+			GL33.glUseProgram(programID);
+			
+			mvpMatrix.store(matBuf);
+			matBuf.flip();
+			GL33.glUniformMatrix4fv(mvpMatrixLocation, false, matBuf);
+			
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			
 			GL33.glEnableVertexAttribArray(0);
 			GL33.glVertexAttribPointer(0, 3, GL33.GL_FLOAT, false, 0, 0);

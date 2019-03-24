@@ -1,10 +1,8 @@
-03:21:55.650	Logger created.
-03:21:55.650	Starting WindowTest
-03:21:56.449	OpenGL Version: 3.3.0 - Build 22.20.16.4749
-03:21:56.457	Shader "shaders/vert0.glsl" compiled: 1
-03:21:56.458	Shader "shaders/frag0.glsl" compiled: 1
-03:21:56.468	OpenGL program linked: 1
-03:21:56.468	OpenGL program validated: 1
-03:21:59.492	Quitting GLFW
-03:21:59.494	QUIT message received by MessageTest.
-03:21:59.494	MessageTest is quitting
+[18:56:26.974]	Logger created.
+[18:56:26.975]	Running on monitor with resolution 1920x1080
+[18:56:26.985]	Starting Skorp 3
+[18:56:27.602]	Shader "shaders/vert0.glsl" compiled: YES
+[18:56:27.603]	Shader "shaders/frag0.glsl" compiled: YES
+[18:56:27.615]	OpenGL program linked: YES
+[18:56:27.615]	OpenGL program validated: YES
+[18:56:53.870]	Quitting GLFW

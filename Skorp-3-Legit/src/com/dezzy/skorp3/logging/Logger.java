@@ -37,6 +37,6 @@ public class Logger {
 	}
 	
 	private static String date() {
-		return timeFormat.format(new Date()) + "\t";
+		return "[" + timeFormat.format(new Date()) + "]\t";
 	}
 }
