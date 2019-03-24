@@ -1,8 +1,13 @@
 package com.dezzy.skorp3.test.graphics;
 
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
+import static org.lwjgl.glfw.GLFW.GLFW_CONTEXT_VERSION_MAJOR;
+import static org.lwjgl.glfw.GLFW.GLFW_CONTEXT_VERSION_MINOR;
 import static org.lwjgl.glfw.GLFW.GLFW_FALSE;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE;
+import static org.lwjgl.glfw.GLFW.GLFW_OPENGL_CORE_PROFILE;
+import static org.lwjgl.glfw.GLFW.GLFW_OPENGL_FORWARD_COMPAT;
+import static org.lwjgl.glfw.GLFW.GLFW_OPENGL_PROFILE;
 import static org.lwjgl.glfw.GLFW.GLFW_RELEASE;
 import static org.lwjgl.glfw.GLFW.GLFW_RESIZABLE;
 import static org.lwjgl.glfw.GLFW.GLFW_TRUE;
@@ -33,6 +38,8 @@ import static org.lwjgl.opengl.GL11.glClearColor;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
+import java.io.IOException;
+import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
 import org.lwjgl.BufferUtils;
@@ -40,35 +47,29 @@ import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
+import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL33;
+import org.lwjgl.opengl.GLCapabilities;
 import org.lwjgl.system.MemoryStack;
 
+import com.dezzy.skorp3.game.graphics.utils.ShaderUtils;
+import com.dezzy.skorp3.game.math.Mat4;
+import com.dezzy.skorp3.game.math.Vec4;
 import com.dezzy.skorp3.logging.Logger;
 import com.dezzy.skorp3.messaging.Message;
 import com.dezzy.skorp3.messaging.MessageHandler;
 import com.dezzy.skorp3.messaging.meta.Sends;
 import com.dezzy.skorp3.messaging.meta.SendsTo;
+import com.dezzy.skorp3.test.math.MatrixTest;
 
 public class WindowTest implements Runnable {
 	private long window;
 	private int vaoID;
 	private int vboID;
-	float[] vertices;
 	
 	@Override
 	public void run() {
 		Logger.log("Starting WindowTest");
-		
-		vaoID = createVAOID();
-		bindVAO(vaoID);
-		
-		vboID = createVBOID();
-		bindVBOBuffer(vboID);
-		vertices = new float[] {
-				-1.0f, -1.0f, 0.0f,
-				1.0f, -1.0f, 0.0f,
-				0.0f, 1.0f, 0.0f
-		};
 		
 		init();
 		loop();
@@ -88,9 +89,16 @@ public class WindowTest implements Runnable {
 		}
 		
 		glfwDefaultWindowHints();
+		
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
+		
 		glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 		
+		//Use glfwGetPrimaryMonitor() for fullscreen
 		window = glfwCreateWindow(300, 300, "Window Test", NULL, NULL);
 		if (window == NULL) {
 			throw new RuntimeException("GLFW window could not be created");
@@ -120,53 +128,74 @@ public class WindowTest implements Runnable {
 		glfwMakeContextCurrent(window);
 		glfwSwapInterval(1);
 		glfwShowWindow(window);
+		
+		GLCapabilities capabilities = GL.createCapabilities();
+		
+		try (MemoryStack stack = MemoryStack.stackPush()) {
+			IntBuffer id = stack.mallocInt(1);
+			GL33.glGenVertexArrays(id);
+			vaoID = id.get(0);
+		}
+		GL33.glBindVertexArray(vaoID);
+		
+		Logger.log("OpenGL Version: " + GL11.glGetString(GL11.GL_VERSION));
 	}
 	
 	@Sends({"QUIT"})
 	@SendsTo({"Global"})
 	private void loop() {
-		GL.createCapabilities();
 		
-		GL33.glEnableVertexAttribArray(0);
-		sendVBOData(vertices);
-		GL33.glVertexAttribPointer(0, 3, GL33.GL_FLOAT, false, 0, 0);
+		final float[] vertices = new float[] {
+				-1.0f, -1.0f, 0.0f,
+				1.0f, -1.0f, 0.0f,
+				0.0f, 1.0f, 0.0f
+		};
 		
-		GL33.glDrawArrays(GL33.GL_TRIANGLES, 0, 3);
-		GL33.glDisableVertexAttribArray(0);
+		try (MemoryStack stack = MemoryStack.stackPush()) {
+			IntBuffer id = stack.mallocInt(1);
+			
+			GL33.glGenBuffers(id);
+			vboID = id.get(0);
+		}
 		
-		glClearColor(0.0f, 1.0f, 0.0f, 0.0f);
+		GL33.glBindBuffer(GL33.GL_ARRAY_BUFFER, vboID);
+		GL33.glBufferData(GL33.GL_ARRAY_BUFFER, vertices, GL33.GL_STATIC_DRAW);
+		
+		int programID = 0;
+		try {
+			int vertShader = ShaderUtils.loadShader("shaders/vert0.glsl", GL33.GL_VERTEX_SHADER);
+			int fragShader = ShaderUtils.loadShader("shaders/frag0.glsl", GL33.GL_FRAGMENT_SHADER);
+			
+			programID = ShaderUtils.createProgramAndLinkShaders(vertShader, fragShader);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		Mat4 mvp = MatrixTest.getTestMVP();
+		System.out.println(mvp.multiply(new Vec4(-1, -1, 0)));
+		FloatBuffer buf = BufferUtils.createFloatBuffer(16);
+		mvp.forEach(buf::put);
+		
+		int matrixID = GL33.glGetUniformLocation(programID, "MVP");
+		
+		
+		glClearColor(1.0f, 1.0f, 0.0f, 0.0f);
+		GL33.glUseProgram(programID);
 		
 		while (!glfwWindowShouldClose(window)) {
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			
+			GL33.glUniformMatrix4fv(matrixID, false, buf);
+			
+			GL33.glEnableVertexAttribArray(0);
+			GL33.glVertexAttribPointer(0, 3, GL33.GL_FLOAT, false, 0, 0);
+			GL33.glDrawArrays(GL33.GL_TRIANGLES, 0, 3);
+			GL33.glDisableVertexAttribArray(0);
+			
 			glfwSwapBuffers(window);
 			glfwPollEvents();
 		}
 		Logger.log("Quitting GLFW");
 		MessageHandler.dispatchGlobal(new Message("QUIT", null));
-	}
-	
-	private int createVAOID() {
-		IntBuffer buffer = BufferUtils.createIntBuffer(1);
-		GL33.glGenVertexArrays(buffer);
-		
-		return buffer.get(0);
-	}
-	
-	private void bindVAO(int vaoID) {
-		GL33.glBindVertexArray(vaoID);
-	}
-	
-	private int createVBOID() {
-		IntBuffer buffer = BufferUtils.createIntBuffer(1);
-		GL33.glGenBuffers(buffer);
-		return buffer.get(0);
-	}
-	
-	private void bindVBOBuffer(int vboID) {
-		GL33.glBindBuffer(GL33.GL_ARRAY_BUFFER, vboID);
-	}
-	
-	private void sendVBOData(float[] vertices) {
-		GL33.glBufferData(GL33.GL_ARRAY_BUFFER, vertices, GL33.GL_STATIC_DRAW);
 	}
 }

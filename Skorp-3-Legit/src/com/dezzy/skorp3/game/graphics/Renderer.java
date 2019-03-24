@@ -1,4 +1,4 @@
-package com.dezzy.skorp3.game;
+package com.dezzy.skorp3.game.graphics;
 
 import java.nio.IntBuffer;
 

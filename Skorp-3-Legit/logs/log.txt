@@ -1,2 +1,10 @@
-00:27:52.380	Logger created.
-00:27:52.380	Starting WindowTest
+03:21:55.650	Logger created.
+03:21:55.650	Starting WindowTest
+03:21:56.449	OpenGL Version: 3.3.0 - Build 22.20.16.4749
+03:21:56.457	Shader "shaders/vert0.glsl" compiled: 1
+03:21:56.458	Shader "shaders/frag0.glsl" compiled: 1
+03:21:56.468	OpenGL program linked: 1
+03:21:56.468	OpenGL program validated: 1
+03:21:59.492	Quitting GLFW
+03:21:59.494	QUIT message received by MessageTest.
+03:21:59.494	MessageTest is quitting
