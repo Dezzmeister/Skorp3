@@ -8,6 +8,20 @@ public class Mesh {
 		triangles = _triangles;
 	}
 	
+	public Mesh add(final Mesh mesh) {
+		Triangle[] newTriangles = new Triangle[triangles.length + mesh.triangles.length];
+		
+		for (int i = 0; i < triangles.length; i++) {
+			newTriangles[i] = triangles[i];
+		}
+		
+		for (int i = triangles.length; i < newTriangles.length; i++) {
+			newTriangles[i] = mesh.triangles[i - triangles.length];
+		}
+		
+		return new Mesh(triangles);
+	}
+	
 	public float[] getVBOVertices() {
 		float[] vertices = new float[triangles.length * 9];
 		
