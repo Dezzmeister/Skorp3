@@ -64,11 +64,39 @@ public class FinalRendererTest {
 				new Vec4(-1, -1, 0),
 				new Vec4(1, -1, 0),
 				new Vec4(0, 1, 0)
-		).setColors(
+			).setColors(
 				new Vec4(1, 0, 0),
 				new Vec4(0, 1, 0),
 				new Vec4(0, 0, 1)
-		));
+			),
+			new Triangle(
+				new Vec4(0, 1, 0),
+				new Vec4(1, -1, 0),
+				new Vec4(1, -1, -2)
+			).setColors(
+				new Vec4(1, 1, 0),
+				new Vec4(0, 1, 1),
+				new Vec4(1, 0, 1)
+			),
+			new Triangle(
+				new Vec4(1, -1, 0),
+				new Vec4(1, -1, -2),
+				new Vec4(-1, -1, 0)
+			).setColors(
+				new Vec4(1, 1, 1),
+				new Vec4(0, 0, 0),
+				new Vec4(0.5f, 0.5f, 0.5f)
+			),
+			new Triangle(
+				new Vec4(1, -1, -2),
+				new Vec4(-1, -1, 0),
+				new Vec4(-1, -1, -2)
+			).setColors(
+				new Vec4(0, 0, 0),
+				new Vec4(0.5f, 0.5f, 0.5f),
+				new Vec4(0, 0, 0)
+			)
+		);
 		
 		skorp.renderer.setVBOVertices(mesh.getVBOVertices());
 		skorp.renderer.setColors(mesh.getColors());
