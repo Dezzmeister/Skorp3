@@ -12,12 +12,26 @@ import org.lwjgl.system.MemoryStack;
 
 import com.dezzy.skorp3.logging.Logger;
 
+/**
+ * Contains utilities for loading, compiling, and linking OpenGL shaders.
+ *
+ * @author Joe Desmond
+ */
 public class ShaderUtils {
 	
 	static {
 		System.getProperty("line.separator");
 	}
 	
+	/**
+	 * Loads a GLSL shader from a file and compiles it. Returns the ID of the compiled shader, and prints any errors to
+	 * the log.
+	 * 
+	 * @param path path to shader
+	 * @param shaderType a GL constant determining if this is a vertex, fragment, or geometry shader
+	 * @return the ID of the shader in the OpenGL context
+	 * @throws IOException if the shader file cannot be loaded
+	 */
 	public static int loadShader(final String path, int shaderType) throws IOException {
 		int shaderID = GL33.glCreateShader(shaderType);
 		
@@ -49,6 +63,13 @@ public class ShaderUtils {
 		return shaderID;
 	}
 	
+	/**
+	 * Creates an OpenGL program in this context and links the shaders with the given
+	 * shader IDs. Returns the ID of the program.
+	 * 
+	 * @param shaderIDs shader IDs
+	 * @return ID of the OpenGL program
+	 */
 	public static int createProgramAndLinkShaders(int ... shaderIDs) {
 		int programID = GL33.glCreateProgram();
 		

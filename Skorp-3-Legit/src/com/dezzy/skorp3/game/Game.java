@@ -73,6 +73,11 @@ public class Game implements Runnable {
 		return this;
 	}
 	
+	/**
+	 * Injects a function that will be called on every game update with the time delta.
+	 * 
+	 * @param updater function that will be called
+	 */
 	public void injectUpdater(final Consumer<Float> updater) {		
 		injectedUpdaters.add(updater);
 	}

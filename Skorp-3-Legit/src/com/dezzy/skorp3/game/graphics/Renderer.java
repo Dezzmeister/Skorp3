@@ -15,6 +15,13 @@ import org.lwjgl.system.MemoryStack;
 import com.dezzy.skorp3.game.graphics.utils.ShaderUtils;
 import com.dezzy.skorp3.game.math.Mat4;
 
+/**
+ * Draws to the screen using OpenGL. This class is intended to be thread-safe. Because of OpenGL rules about
+ * calling threads, this should be created and run on its own thread. Proxy methods are provided to pass data between
+ * a main thread and this renderer. 
+ *
+ * @author Joe Desmond
+ */
 public class Renderer {
 	private final FloatBuffer mvpBuffer = BufferUtils.createFloatBuffer(16);
 	
@@ -31,7 +38,15 @@ public class Renderer {
 	private int vaoID;
 	private int vboID;
 	private int colorBuffer;
-	
+	/**
+	 * Constructs a Renderer and an OpenGL program from the given shaders. The renderer
+	 * has one VBO and one color buffer. <br>
+	 * <b>NOTE:</b> Because this constructor uses OpenGL functions, 
+	 * it should be called from the thread that created the OpenGL context.
+	 * 
+	 * @param vertShaderPath path to vertex shader
+	 * @param fragShaderPath path to fragment shader
+	 */
 	public Renderer(final String vertShaderPath, final String fragShaderPath) {		
 		vaoID = createAndBindVAO();
 		vboID = createVBO();
@@ -41,6 +56,11 @@ public class Renderer {
 		getShaderInputs();
 	}
 	
+	/**
+	 * Renders this renderer's vertices and colors. <br>
+	 * <b>NOTE:</b> Because this function uses OpenGL functions, 
+	 * it should be called from the thread that created the OpenGL context.
+	 */
 	public void render() {
 		checkVBOVerticesUpdates();
 		checkColorUpdates();
@@ -160,11 +180,23 @@ public class Renderer {
 		return _colorBuf;
 	}
 	
+	/**
+	 * Sets the vertex buffer for this renderer's OpenGL program. The new vertices will be loaded
+	 * into the program at the start of the next rendering cycle.
+	 * 
+	 * @param _vertices triangle vertices
+	 */
 	public void setVBOVertices(final float[] _vertices) {
 		vertices = _vertices;
 		vertsUpdated = true;
 	}
 	
+	/**
+	 * Sets the color buffer for this renderer's OpenGL program. The new colors will be loaded
+	 * into the program at the start of the next rendering cycle.
+	 * 
+	 * @param _colors RGB values for triangle vertices
+	 */
 	public void setColors(final float[] _colors) {
 		colors = _colors;
 		colorsUpdated = true;
@@ -180,6 +212,12 @@ public class Renderer {
 		GL33.glBufferData(GL33.GL_ARRAY_BUFFER, colors, GL33.GL_STATIC_DRAW);
 	}
 	
+	/**
+	 * Sets the Model-View-Projection matrix for this renderer's OpenGL program. The new matrix will be loaded
+	 * into the program in the next rendering cycle.
+	 * 
+	 * @param _mvpMatrix Model-View-Projection matrix
+	 */
 	public void setMVPMatrix(final Mat4 _mvpMatrix) {
 		mvpMatrix = _mvpMatrix;
 	}

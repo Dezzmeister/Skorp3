@@ -1,8 +1,8 @@
-[21:54:22.360]	Logger created.
-[21:54:22.361]	Running on monitor with resolution 1920x1080
-[21:54:22.372]	Starting Skorp 3
-[21:54:23.165]	Shader "shaders/vert0.glsl" compiled: YES
-[21:54:23.166]	Shader "shaders/frag0.glsl" compiled: YES
-[21:54:23.178]	OpenGL program linked: YES
-[21:54:23.178]	OpenGL program validated: YES
-[21:54:34.740]	Quitting GLFW
+[23:58:03.014]	Logger created.
+[23:58:03.016]	Running on monitor with resolution 1920x1080
+[23:58:03.027]	Starting Skorp 3
+[23:58:03.817]	Shader "shaders/vert0.glsl" compiled: YES
+[23:58:03.818]	Shader "shaders/frag0.glsl" compiled: YES
+[23:58:03.831]	OpenGL program linked: YES
+[23:58:03.832]	OpenGL program validated: YES
+[23:58:13.121]	Quitting GLFW

@@ -11,6 +11,12 @@ import com.dezzy.skorp3.game.input.MouseHandler;
 import com.dezzy.skorp3.game.math.Mat4;
 import com.dezzy.skorp3.logging.Logger;
 
+/**
+ * Manages the creation of a Skorp 3 game and all of its objects. It is necessary that the parts of the game run on their own thread,
+ * because OpenGL only permits GL function calls for a context from the thread that created a context.
+ *
+ * @author Joe Desmond
+ */
 public class GameStarter implements Runnable {
 	private volatile boolean initFinished = false;
 	
@@ -28,6 +34,12 @@ public class GameStarter implements Runnable {
 		return initFinished;
 	}
 	
+	/**
+	 * Waits for this GameStarter to finish initializing all local members on its thread.
+	 * When this GameStarter starts a game on its own thread, it first initializes the Game, Renderer,
+	 * and other game objects. If the original thread does not wait for this initialization to complete,
+	 * null pointer exceptions can occur if something tries to access a member too soon.
+	 */
 	public void waitForInitialization() {
 		while (!initFinished);
 	}

@@ -3,8 +3,23 @@ package com.dezzy.skorp3.game.graphics.utils;
 import com.dezzy.skorp3.game.math.Mat4;
 import com.dezzy.skorp3.game.math.Vec4;
 
+/**
+ * Consists of static methods to construct 3D transformation matrices.
+ *
+ * @author Joe Desmond
+ */
 public class TransformUtils {
 	
+	/**
+	 * Create a perspective projection matrix with the specified FoV, aspect ratio, near clipping plane,
+	 * and far clipping plane.
+	 * 
+	 * @param fovy FoV in radians
+	 * @param aspect aspect ratio of the screen
+	 * @param zNear near clipping plane
+	 * @param zFar far clipping plane
+	 * @return perspective projection matrix
+	 */
 	public static Mat4 perspective(float fovy, float aspect, float zNear, float zFar) {
 		float yScale = (float) (1.0f / Math.tan(fovy / 2.0f));
 		float xScale = yScale / aspect;
@@ -15,18 +30,6 @@ public class TransformUtils {
 				0, yScale, 0, 0,
 				0, 0, -((zFar + zNear) / frustumLength), -((2 * zFar * zNear) / frustumLength),
 				0, 0, -1, 0
-		});
-	}
-	
-	public static Mat4 perspective0(float fovy, float aspect, float n, float f) {
-		float yScale = (float) (1.0f / Math.tan(fovy / 2.0f));
-		float xScale = yScale / aspect;
-		
-		return new Mat4(new float[] {
-				xScale, 0, 0, 0,
-				0, yScale, 0, 0,
-				0, 0, ((f + n) / (f - n)), 1,
-				0, 0, ((2 * f * n) / (n - f)), 0
 		});
 	}
 	
