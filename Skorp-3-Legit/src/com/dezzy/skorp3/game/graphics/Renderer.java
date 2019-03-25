@@ -99,7 +99,7 @@ public class Renderer {
 	private void sendMVPMatrix() {
 		mvpMatrix.store(mvpBuffer);
 		mvpBuffer.flip();
-		GL33.glUniformMatrix4fv(vertShaderData.mvpMatrixLocation, false, mvpBuffer);
+		GL33.glUniformMatrix4fv(vertShaderData.mvpMatrixLocation, true, mvpBuffer);
 	}
 	
 	private void getShaderInputs() {

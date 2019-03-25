@@ -18,6 +18,18 @@ public class TransformUtils {
 		});
 	}
 	
+	public static Mat4 perspective0(float fovy, float aspect, float n, float f) {
+		float yScale = (float) (1.0f / Math.tan(fovy / 2.0f));
+		float xScale = yScale / aspect;
+		
+		return new Mat4(new float[] {
+				xScale, 0, 0, 0,
+				0, yScale, 0, 0,
+				0, 0, ((f + n) / (f - n)), 1,
+				0, 0, ((2 * f * n) / (n - f)), 0
+		});
+	}
+	
 	public static Mat4 lookAt(final Vec4 eye, final Vec4 center, final Vec4 up) {
 		Vec4 Z = center.minus(eye).normalize();
 		Vec4 X = Vec4.cross(Z, up).normalize();

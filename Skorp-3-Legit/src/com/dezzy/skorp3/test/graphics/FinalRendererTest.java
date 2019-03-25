@@ -44,6 +44,7 @@ public class FinalRendererTest {
 		gameStarter.renderer.setColors(mesh.getColors());
 		
 		Mat4 proj = TransformUtils.perspective((float)Math.PI / 4.0f, WIDTH/(float)HEIGHT, 0.1f, 100.0f);
+		//Mat4 proj = Mat4.IDENTITY;
 		
 		while (gameStarter.game.isRunning()) {
 			Mat4 model = TransformUtils.translate(0, 0, -8).multiply(TransformUtils.rotateY(anglePtr.get()));
