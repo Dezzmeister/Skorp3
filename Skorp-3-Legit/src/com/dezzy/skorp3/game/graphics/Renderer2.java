@@ -16,25 +16,31 @@ import org.lwjgl.system.MemoryStack;
 import com.dezzy.skorp3.game.graphics.geometry.Triangle;
 import com.dezzy.skorp3.game.graphics.utils.ShaderUtils;
 import com.dezzy.skorp3.game.math.Mat4;
+import com.dezzy.skorp3.logging.Logger;
 
 public class Renderer2 {
 	private final FloatBuffer mvpBuffer = BufferUtils.createFloatBuffer(16);
 	
 	private int vaoID;
 	private int vboID;
+	private int uvBuffer;
 	private int programID;
 	private int mvpMatrixLocation;
 	private int textureSamplerLocation;
 	private volatile Mat4 mvpMatrix;
 	
 	private float[] vertices;
+	private float[] uvVertices;
 	private Triangle[] triangles;
+	private Texture[] textures;
 	private int[] textureIDs;
 	private volatile boolean updateTriangles = false;
 	
 	public Renderer2(final String vertShaderPath, final String fragShaderPath) {		
 		vaoID = createAndBindVAO();
 		vboID = createVBO();
+		uvBuffer = createUVBuffer();
+		textures = createTextureArray();
 		
 		programID = createGLProgram(vertShaderPath, fragShaderPath);
 		getShaderInputs();
@@ -45,19 +51,41 @@ public class Renderer2 {
 		clearScreen();
 		GL33.glUseProgram(programID);
 		sendMVPMatrix();
-		sendTriangles();
+		enableTriangles();
+		enableUVVertices();
 		drawTriangles();
-		disableVertexAttribArrays(0);
+		disableVertexAttribArrays(1);
 	}
 	
 	private void drawTriangles() {
-		for (int i = 0; i < textureIDs.length; i++) {
-			int id = textureIDs[i];
+		for (int i = 0; i < triangles.length; i++) {
+			Triangle t = triangles[i];
+			int id = t.tex.glTextureID;
+			int unit = t.tex.glImageUnit;
 			
-			GL33.glActiveTexture(GL33.GL_TEXTURE0);
-			GL33.glBindTexture(GL33.GL_TEXTURE_2D, id);
-			GL33.glDrawArrays(GL33.GL_TRIANGLES, 0, 3);
+			GL33.glActiveTexture(GL33.GL_TEXTURE0 + unit);
+			GL33.glBindTexture(GL33.GL_TEXTURE_2D, textureSamplerLocation);
+			GL33.glUniform1i(id, 0);
+			GL33.glDrawArrays(GL33.GL_TRIANGLES, i * 3, 3);
 		}
+	}
+	
+	private int createUVBuffer() {
+		int id;
+		
+		try (MemoryStack stack = MemoryStack.stackPush()) {
+			IntBuffer buf = stack.mallocInt(1);
+			
+			GL33.glGenBuffers(buf);
+			id = buf.get(0);
+		}
+		
+		return id;
+	}
+	
+	private Texture[] createTextureArray() {
+		int maxTextures = GL33.glGetInteger(GL33.GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS);
+		return new Texture[maxTextures];
 	}
 	
 	private void disableVertexAttribArrays(int upto) {
@@ -66,10 +94,16 @@ public class Renderer2 {
 		}
 	}
 	
-	private void sendTriangles() {
+	private void enableTriangles() {
 		GL33.glEnableVertexAttribArray(0);
 		GL33.glBindBuffer(GL33.GL_ARRAY_BUFFER, vboID);
 		GL33.glVertexAttribPointer(0, 3, GL33.GL_FLOAT, false, 0, 0);
+	}
+	
+	private void enableUVVertices() {
+		GL33.glEnableVertexAttribArray(1);
+		GL33.glBindBuffer(GL33.GL_ARRAY_BUFFER, textureSamplerLocation);
+		GL33.glVertexAttribPointer(1, 2, GL33.GL_FLOAT, false, 0, 0);
 	}
 	
 	private void sendMVPMatrix() {
@@ -90,6 +124,11 @@ public class Renderer2 {
 		}
 	}
 	
+	private void sendUVData(final float[] uvVerts) {
+		GL33.glBindBuffer(GL33.GL_ARRAY_BUFFER, uvBuffer);
+		GL33.glBufferData(GL33.GL_ARRAY_BUFFER, uvVerts, GL33.GL_STATIC_DRAW);
+	}
+	
 	public void sendTriangles(final Triangle[] _triangles) {
 		triangles = _triangles;
 		updateTriangles = true;
@@ -106,20 +145,18 @@ public class Renderer2 {
 		
 		textureIDs = new int[triangles.length];
 		vertices = new float[triangles.length * 9];
+		uvVertices = new float[triangles.length * 6];
+		
+		int freeImageUnit = findNewImageUnit();
+		
+		if (freeImageUnit == -1) {
+			Logger.error("Unable to send triangle info, no free texture units available.");
+			return;
+		}
 		
 		for (int i = 0; i < triangles.length; i++) {
 			Triangle t = triangles[i];
 			Texture tex = t.tex;
-			
-			int id;
-			
-			if (!knownTextures.contains(tex)) {
-				id = addTexture(tex);
-				tex.glTextureID = id;
-			} else {
-				id = tex.glTextureID;
-			}
-			textureIDs[i] = id;
 			
 			int offset = i * 9;
 			vertices[offset] = t.v0.x;
@@ -133,10 +170,53 @@ public class Renderer2 {
 			vertices[offset + 6] = t.v2.x;
 			vertices[offset + 7] = t.v2.y;
 			vertices[offset + 8] = t.v2.z;
+			
+			offset = i * 6;
+			uvVertices[offset] = t.uv0.x;
+			uvVertices[offset + 1] = t.uv0.y;
+			
+			uvVertices[offset + 2] = t.uv1.x;
+			uvVertices[offset + 3] = t.uv1.y;
+			
+			uvVertices[offset + 4] = t.uv2.x;
+			uvVertices[offset + 5] = t.uv2.y;
+			
+			int id;
+			
+			if (!knownTextures.contains(tex)) {
+				id = addTexture(tex);
+				tex.glTextureID = id;
+				
+				tex.setImageUnit(freeImageUnit);
+				textures[freeImageUnit] = tex;
+				
+				freeImageUnit = findNewImageUnit();
+				
+				if (freeImageUnit == -1) {
+					textureIDs[i] = id;
+					Logger.error("Unable to send triangle info, no free texture units available.");
+					return;
+				}
+			} else {
+				id = tex.glTextureID;
+			}
+			textureIDs[i] = id;
 		}
 		
 		GL33.glBindBuffer(GL33.GL_ARRAY_BUFFER, vboID);
 		GL33.glBufferData(GL33.GL_ARRAY_BUFFER, vertices, GL33.GL_STATIC_DRAW);
+		
+		sendUVData(uvVertices);
+	}
+	
+	private int findNewImageUnit() {
+		for (int i = 0; i < textures.length; i++) {
+			if (textures[i] == null) {
+				return i;
+			}
+		}
+		
+		return -1;
 	}
 	
 	private int addTexture(final Texture tex) {

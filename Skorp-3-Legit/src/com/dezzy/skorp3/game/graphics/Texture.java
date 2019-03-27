@@ -14,6 +14,7 @@ public class Texture {
 	public final int HEIGHT;
 	
 	public int glTextureID;
+	public int glImageUnit;
 	public int index;
 	
 	public Texture(final String path) {
@@ -38,6 +39,10 @@ public class Texture {
 		pixels = tempPixels;
 		WIDTH = tempWidth;
 		HEIGHT = tempHeight;
+	}
+	
+	public void setImageUnit(int imageUnit) {
+		glImageUnit = imageUnit;
 	}
 	
 	public void setTextureID(int textureID) {

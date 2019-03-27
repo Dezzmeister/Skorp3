@@ -116,7 +116,6 @@ public class Game implements Runnable {
 		glfwSetKeyCallback(window, keyCallback);
 		glfwSetCursorPosCallback(window, cursorPosCallback);
 		
-		
 		try (MemoryStack stack = stackPush()) {
 			IntBuffer pWidth = stack.mallocInt(1);
 			IntBuffer pHeight = stack.mallocInt(1);
@@ -136,6 +135,8 @@ public class Game implements Runnable {
 		glfwShowWindow(window);
 		
 		GL.createCapabilities();
+		Logger.log("OpenGL version: " + GL33.glGetString(GL33.GL_VERSION));
+		Logger.log("OpenGL texture units: " + GL33.glGetInteger(GL33.GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS));
 		
 		GL33.glEnable(GL33.GL_DEPTH_TEST);
 		GL33.glDepthFunc(GL33.GL_LESS);

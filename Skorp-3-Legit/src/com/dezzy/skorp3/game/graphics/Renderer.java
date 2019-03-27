@@ -16,6 +16,7 @@ import org.lwjgl.system.MemoryStack;
 import com.dezzy.skorp3.game.graphics.geometry.Triangle;
 import com.dezzy.skorp3.game.graphics.utils.ShaderUtils;
 import com.dezzy.skorp3.game.math.Mat4;
+import com.dezzy.skorp3.logging.Logger;
 
 /**
  * Draws to the screen using OpenGL. This class is intended to be thread-safe. Because of OpenGL rules about
