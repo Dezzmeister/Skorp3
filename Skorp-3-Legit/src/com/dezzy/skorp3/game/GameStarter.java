@@ -25,9 +25,11 @@ public class GameStarter implements Runnable {
 	public MouseHandler mouseHandler;
 	public KeyboardHandler keyHandler;
 	private Dimension initialWindowSize;
+	private final boolean fullscreen;
 	
-	public GameStarter(final Dimension _initialWindowSize) {
+	public GameStarter(final Dimension _initialWindowSize, boolean _fullscreen) {
 		initialWindowSize = _initialWindowSize;
+		fullscreen = _fullscreen;
 	}
 	
 	public boolean initializationFinished() {
@@ -54,7 +56,7 @@ public class GameStarter implements Runnable {
 		mouseHandler = new MouseHandler(new Point(0,0), new Point(screenRes.getWidth() / 2, screenRes.getHeight() / 2));
 		keyHandler = new KeyboardHandler();
 		
-		game = new Game(keyHandler, mouseHandler, new Dimension(width, height));
+		game = new Game(keyHandler, mouseHandler, new Dimension(width, height), fullscreen);
 		renderer = new Renderer("shaders/vert0.glsl", "shaders/frag0.glsl");
 		
 		game.setRenderer(renderer);

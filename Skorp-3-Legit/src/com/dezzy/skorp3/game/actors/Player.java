@@ -6,7 +6,13 @@ public class Player {
 	private static final float HALF_PI = (float)Math.PI / 2;
 	
 	public final Vec4 position;
+	/**
+	 * How far left/right the head is turned
+	 */
 	public float yaw = 0.0f;
+	/**
+	 * How far up/down the head is turned
+	 */
 	public float pitch = 0.0f;
 	
 	public Player(final Vec4 initialPosition) {

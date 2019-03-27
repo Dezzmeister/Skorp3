@@ -62,9 +62,9 @@ public class Game implements Runnable {
 	private final long windowHandle;
 	private List<Consumer<Float>> injectedUpdaters = new ArrayList<Consumer<Float>>();
 	
-	public Game(final GLFWKeyCallbackI keyCallback, final GLFWCursorPosCallbackI cursorPosCallback, final Dimension initialSize) {
+	public Game(final GLFWKeyCallbackI keyCallback, final GLFWCursorPosCallbackI cursorPosCallback, final Dimension initialSize, boolean fullscreen) {
 		Logger.log("Starting Skorp 3");
-		windowHandle = initializeOpenGL(keyCallback, cursorPosCallback, initialSize);
+		windowHandle = initializeOpenGL(keyCallback, cursorPosCallback, initialSize, fullscreen);
 		initializeState();
 	}
 	
@@ -86,7 +86,7 @@ public class Game implements Runnable {
 		postNewState();
 	}
 	
-	private long initializeOpenGL(final GLFWKeyCallbackI keyCallback, final GLFWCursorPosCallbackI cursorPosCallback, final Dimension initialSize) {
+	private long initializeOpenGL(final GLFWKeyCallbackI keyCallback, final GLFWCursorPosCallbackI cursorPosCallback, final Dimension initialSize, boolean fullscreen) {
 		long window;
 		
 		GLFWErrorCallback errorCallback = GLFWErrorCallback.createPrint(Logger.getLogger()).set();
@@ -107,7 +107,7 @@ public class Game implements Runnable {
 		glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 		
-		window = glfwCreateWindow(initialSize.width, initialSize.height, "Skorp 3", NULL, NULL);
+		window = glfwCreateWindow(initialSize.width, initialSize.height, "Skorp 3", fullscreen ? GLFW.glfwGetPrimaryMonitor() : NULL, NULL);
 		if (window == NULL) {
 			Logger.error("GLFW window could not be created");
 			throw new RuntimeException("GLFW window could not be created");

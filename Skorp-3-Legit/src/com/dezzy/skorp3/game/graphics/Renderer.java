@@ -2,16 +2,18 @@ package com.dezzy.skorp3.game.graphics;
 
 import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
-import static org.lwjgl.opengl.GL11.glClear;
 
 import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL33;
 import org.lwjgl.system.MemoryStack;
 
+import com.dezzy.skorp3.game.graphics.geometry.Triangle;
 import com.dezzy.skorp3.game.graphics.utils.ShaderUtils;
 import com.dezzy.skorp3.game.math.Mat4;
 
@@ -38,6 +40,9 @@ public class Renderer {
 	private int vaoID;
 	private int vboID;
 	private int colorBuffer;
+	private List<Texture> knownTextures = new ArrayList<Texture>();
+	private volatile boolean texturesSent = false;
+	
 	/**
 	 * Constructs a Renderer and an OpenGL program from the given shaders. The renderer
 	 * has one VBO and one color buffer. <br>
@@ -64,6 +69,7 @@ public class Renderer {
 	public void render() {
 		checkVBOVerticesUpdates();
 		checkColorUpdates();
+		checkForNewTextures();
 		
 		clearScreen();		
 		GL33.glUseProgram(programID);
@@ -139,6 +145,40 @@ public class Renderer {
 		}
 		
 		return _programID;
+	}
+
+	private void checkForNewTextures() {
+		if (!texturesSent) {
+			for (int i = 0; i < knownTextures.size(); i++) {
+				addTexture(knownTextures.get(i));
+			}
+		}
+	}
+	
+	private int addTexture(final Texture tex) {
+		int textureID = -1;
+		
+		for (int i = 0; i < knownTextures.size(); i++) {
+			if (tex == knownTextures.get(i)) {
+				return knownTextures.get(i).glTextureID;
+			}
+		}
+		knownTextures.add(tex);
+		
+		try (MemoryStack stack = MemoryStack.stackPush()) {
+			IntBuffer id = stack.mallocInt(1);
+			GL33.glGenTextures(id);
+			textureID = id.get(0);
+		}
+		
+		GL33.glBindTexture(GL33.GL_TEXTURE_2D, textureID);
+		GL33.glTexImage2D(GL33.GL_TEXTURE_2D, 0, GL33.GL_RGB, tex.WIDTH, tex.HEIGHT, 0, GL33.GL_RGB, GL33.GL_UNSIGNED_INT, tex.pixels);
+		
+		GL33.glTexParameteri(GL33.GL_TEXTURE_2D, GL33.GL_TEXTURE_MAG_FILTER, GL33.GL_NEAREST);
+		GL33.glTexParameteri(GL33.GL_TEXTURE_2D, GL33.GL_TEXTURE_MIN_FILTER, GL33.GL_NEAREST);
+		
+		tex.setTextureID(textureID);
+		return textureID;
 	}
 	
 	private int createAndBindVAO() {
