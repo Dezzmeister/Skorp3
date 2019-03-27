@@ -6,6 +6,7 @@ import java.awt.GraphicsEnvironment;
 import java.awt.Point;
 
 import com.dezzy.skorp3.game.graphics.Renderer;
+import com.dezzy.skorp3.game.graphics.Renderer2;
 import com.dezzy.skorp3.game.input.KeyboardHandler;
 import com.dezzy.skorp3.game.input.MouseHandler;
 import com.dezzy.skorp3.game.math.Mat4;
@@ -22,10 +23,12 @@ public class GameStarter implements Runnable {
 	
 	public Game game;
 	public Renderer renderer;
+	public Renderer2 renderer2;
 	public MouseHandler mouseHandler;
 	public KeyboardHandler keyHandler;
 	private Dimension initialWindowSize;
 	private final boolean fullscreen;
+	private boolean useUpdatedRenderer = true;
 	
 	public GameStarter(final Dimension _initialWindowSize, boolean _fullscreen) {
 		initialWindowSize = _initialWindowSize;
@@ -57,14 +60,19 @@ public class GameStarter implements Runnable {
 		keyHandler = new KeyboardHandler();
 		
 		game = new Game(keyHandler, mouseHandler, new Dimension(width, height), fullscreen);
-		renderer = new Renderer("shaders/vert0.glsl", "shaders/frag0.glsl");
 		
-		game.setRenderer(renderer);
-		
-		renderer.setVBOVertices(new float[] {0, 0, 0, 0, 0, 0, 0, 0, 0});
-		renderer.setColors(new float[] {1, 1, 1, 1, 1, 1, 1, 1, 1});
-		
-		renderer.setMVPMatrix(Mat4.IDENTITY);
+		if (!useUpdatedRenderer) {
+			renderer = new Renderer("shaders/vert0.glsl", "shaders/frag0.glsl");
+			game.setRenderer(renderer);
+			
+			renderer.setVBOVertices(new float[] {0, 0, 0, 0, 0, 0, 0, 0, 0});
+			renderer.setColors(new float[] {1, 1, 1, 1, 1, 1, 1, 1, 1});
+			
+			renderer.setMVPMatrix(Mat4.IDENTITY);
+		} else {
+			renderer2 = new Renderer2("shaders/vert1.glsl", "shaders/frag1.glsl");
+			game.setRenderer2(renderer2);
+		}
 		
 		initFinished = true;
 	}

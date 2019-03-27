@@ -32,7 +32,7 @@ public class Renderer2 {
 	private int programID;
 	private int mvpMatrixLocation;
 	private int textureSamplerLocation;
-	private volatile Mat4 mvpMatrix;
+	private volatile Mat4 mvpMatrix = Mat4.IDENTITY;
 	
 	private float[] vertices;
 	private float[] uvVertices;
@@ -57,7 +57,7 @@ public class Renderer2 {
 	public void render() {
 		checkForUpdates();
 		clearScreen();
-		if (renderVertices) {
+		if (renderVertices && triangles != null) {
 			GL33.glUseProgram(programID);
 			sendMVPMatrix();
 			enableTriangles();
@@ -74,19 +74,20 @@ public class Renderer2 {
 		
 		if (msg.equals("STATE_UPDATE")) {
 			StateUpdateObject suo = (StateUpdateObject) message.data;
-			renderVertices = Boolean.parseBoolean(suo.newState.properties.getProperty("render_enabled"));
+			//renderVertices = Boolean.parseBoolean(suo.newState.properties.getProperty("render_enabled"));
 		}
 	}
 	
 	private void drawTriangles() {
+		
 		for (int i = 0; i < triangles.length; i++) {
 			Triangle t = triangles[i];
 			int id = t.tex.glTextureID;
 			int unit = t.tex.glImageUnit;
 			
 			GL33.glActiveTexture(GL33.GL_TEXTURE0 + unit);
-			GL33.glBindTexture(GL33.GL_TEXTURE_2D, textureSamplerLocation);
-			GL33.glUniform1i(id, 0);
+			GL33.glBindTexture(GL33.GL_TEXTURE_2D, id);
+			GL33.glUniform1i(textureSamplerLocation, 0);
 			GL33.glDrawArrays(GL33.GL_TRIANGLES, i * 3, 3);
 		}
 	}
@@ -123,7 +124,7 @@ public class Renderer2 {
 	
 	private void enableUVVertices() {
 		GL33.glEnableVertexAttribArray(1);
-		GL33.glBindBuffer(GL33.GL_ARRAY_BUFFER, textureSamplerLocation);
+		GL33.glBindBuffer(GL33.GL_ARRAY_BUFFER, uvBuffer);
 		GL33.glVertexAttribPointer(1, 2, GL33.GL_FLOAT, false, 0, 0);
 	}
 	
@@ -145,9 +146,10 @@ public class Renderer2 {
 		}
 	}
 	
-	private void sendUVData(final float[] uvVerts) {
+	private void sendUVData() {
 		GL33.glBindBuffer(GL33.GL_ARRAY_BUFFER, uvBuffer);
-		GL33.glBufferData(GL33.GL_ARRAY_BUFFER, uvVerts, GL33.GL_STATIC_DRAW);
+		GL33.glBufferData(GL33.GL_ARRAY_BUFFER, uvVertices, GL33.GL_STATIC_DRAW);
+		Logger.log("OpenGL: UV data sent.");
 	}
 	
 	public void sendTriangles(final Triangle[] _triangles) {
@@ -227,7 +229,7 @@ public class Renderer2 {
 		GL33.glBindBuffer(GL33.GL_ARRAY_BUFFER, vboID);
 		GL33.glBufferData(GL33.GL_ARRAY_BUFFER, vertices, GL33.GL_STATIC_DRAW);
 		
-		sendUVData(uvVertices);
+		sendUVData();
 	}
 	
 	private int findNewImageUnit() {
@@ -251,7 +253,7 @@ public class Renderer2 {
 		}
 		
 		GL33.glBindTexture(GL33.GL_TEXTURE_2D, id);
-		GL33.glTexImage2D(GL33.GL_TEXTURE_2D, 0, GL33.GL_RGB, tex.WIDTH, tex.HEIGHT, 0, GL33.GL_RGB, GL33.GL_UNSIGNED_INT, tex.pixels);
+		GL33.glTexImage2D(GL33.GL_TEXTURE_2D, 0, GL33.GL_RGB, tex.WIDTH, tex.HEIGHT, 0, GL33.GL_BGRA, GL33.GL_UNSIGNED_BYTE, tex.pixels);
 		GL33.glTexParameteri(GL33.GL_TEXTURE_2D, GL33.GL_TEXTURE_MAG_FILTER, GL33.GL_NEAREST);
 		GL33.glTexParameteri(GL33.GL_TEXTURE_2D, GL33.GL_TEXTURE_MIN_FILTER, GL33.GL_NEAREST);
 		

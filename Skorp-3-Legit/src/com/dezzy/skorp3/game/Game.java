@@ -46,6 +46,7 @@ import org.lwjgl.opengl.GL33;
 import org.lwjgl.system.MemoryStack;
 
 import com.dezzy.skorp3.game.graphics.Renderer;
+import com.dezzy.skorp3.game.graphics.Renderer2;
 import com.dezzy.skorp3.game.state.GameState;
 import com.dezzy.skorp3.game.state.StateUpdateObject;
 import com.dezzy.skorp3.logging.Logger;
@@ -59,6 +60,7 @@ public class Game implements Runnable {
 	private volatile boolean isRunning = false;
 	private GameState currentState = GameState.INTRO;
 	private Renderer renderer;
+	private Renderer2 renderer2;
 	private final long windowHandle;
 	private List<Consumer<Float>> injectedUpdaters = new ArrayList<Consumer<Float>>();
 	
@@ -70,6 +72,11 @@ public class Game implements Runnable {
 	
 	public Game setRenderer(final Renderer _renderer) {
 		renderer = _renderer;
+		return this;
+	}
+	
+	public Game setRenderer2(final Renderer2 _renderer2) {
+		renderer2 = _renderer2;
 		return this;
 	}
 	
@@ -153,7 +160,13 @@ public class Game implements Runnable {
 	
 	private void render(float delta) {
 		preRender();
-		renderer.render();
+		
+		if (renderer2 != null) {
+			renderer2.render();
+		} else {
+			renderer.render();
+		}
+		
 		postRender();
 	}
 	

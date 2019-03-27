@@ -9,7 +9,7 @@ public class Main {
 		Startup.start();
 		//MatrixTest.testTransformations();
 		//MessageTest.globalMessageTest();
-		FinalRendererTest.testGameWithInput();
+		FinalRendererTest.testTexturedGameWithInput();
 	}
 	
 }

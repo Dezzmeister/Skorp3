@@ -7,12 +7,14 @@ import com.dezzy.skorp3.game.Game;
 import com.dezzy.skorp3.game.GameStarter;
 import com.dezzy.skorp3.game.actors.Player;
 import com.dezzy.skorp3.game.graphics.Renderer;
+import com.dezzy.skorp3.game.graphics.Texture;
 import com.dezzy.skorp3.game.graphics.geometry.Mesh;
 import com.dezzy.skorp3.game.graphics.geometry.Triangle;
 import com.dezzy.skorp3.game.graphics.utils.TransformUtils;
 import com.dezzy.skorp3.game.input.KeyboardHandler;
 import com.dezzy.skorp3.game.input.MouseHandler;
 import com.dezzy.skorp3.game.math.Mat4;
+import com.dezzy.skorp3.game.math.Vec2;
 import com.dezzy.skorp3.game.math.Vec4;
 
 public class FinalRendererTest {
@@ -60,19 +62,12 @@ public class FinalRendererTest {
 			}
 		});
 		
-		Mesh mesh = new Mesh(new Triangle(
-				new Vec4(-1, -1, 0),
-				new Vec4(1, -1, 0),
-				new Vec4(0, 1, 0)
-			).setColors(
-				new Vec4(1, 0, 0),
-				new Vec4(0, 1, 0),
-				new Vec4(0, 0, 1)
-			)
-		);
+		Triangle triangle = new Triangle(new Vec4(-1, -1, 0), new Vec4(1, -1, 0), new Vec4(0, 1, 0));
+		Texture wall512 = new Texture("assets/textures/wall512.png");
+		triangle.setTexture(wall512);
+		triangle.setUV(new Vec2(0, 0), new Vec2(1, 0), new Vec2(0.5f, 1));
 		
-		skorp.renderer.setVBOVertices(mesh.getVBOVertices());
-		skorp.renderer.setColors(mesh.getColors());
+		skorp.renderer2.sendTrianglesAndWait(new Triangle[] {triangle});
 		
 		Mat4 proj = TransformUtils.perspective((float)Math.PI / 4.0f, WIDTH/(float)HEIGHT, 0.1f, 100.0f);
 		
@@ -82,7 +77,7 @@ public class FinalRendererTest {
 			Mat4 model = TransformUtils.rotateY(-mainPlayer.yaw).multiply(TransformUtils.translate(-pos.x, -pos.y, -pos.z));
 			
 			Mat4 mvpMatrix = proj.multiply(model);
-			skorp.renderer.setMVPMatrix(mvpMatrix);
+			skorp.renderer2.setMVPMatrix(mvpMatrix);
 		}
 	}
 	
