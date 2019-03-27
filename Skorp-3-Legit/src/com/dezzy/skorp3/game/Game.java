@@ -144,6 +144,8 @@ public class Game implements Runnable {
 		return window;
 	}
 	
+	@Sends("STATE_UPDATE")
+	@SendsTo("Game State")
 	private void postNewState() {
 		StateUpdateObject suo = new StateUpdateObject(currentState, currentState);
 		MessageHandlerRegistry.GAME_STATE_HANDLER.dispatch(new Message("STATE_UPDATE", suo));

@@ -16,7 +16,12 @@ import org.lwjgl.system.MemoryStack;
 import com.dezzy.skorp3.game.graphics.geometry.Triangle;
 import com.dezzy.skorp3.game.graphics.utils.ShaderUtils;
 import com.dezzy.skorp3.game.math.Mat4;
+import com.dezzy.skorp3.game.state.StateUpdateObject;
 import com.dezzy.skorp3.logging.Logger;
+import com.dezzy.skorp3.messaging.Message;
+import com.dezzy.skorp3.messaging.MessageHandlerRegistry;
+import com.dezzy.skorp3.messaging.meta.Handles;
+import com.dezzy.skorp3.messaging.meta.HandlesFor;
 
 public class Renderer2 {
 	private final FloatBuffer mvpBuffer = BufferUtils.createFloatBuffer(16);
@@ -35,6 +40,7 @@ public class Renderer2 {
 	private Texture[] textures;
 	private int[] textureIDs;
 	private volatile boolean updateTriangles = false;
+	private volatile boolean renderVertices = true;
 	
 	public Renderer2(final String vertShaderPath, final String fragShaderPath) {		
 		vaoID = createAndBindVAO();
@@ -44,17 +50,32 @@ public class Renderer2 {
 		
 		programID = createGLProgram(vertShaderPath, fragShaderPath);
 		getShaderInputs();
+		
+		MessageHandlerRegistry.GAME_STATE_HANDLER.registerCallback(this::checkState);
 	}
 	
 	public void render() {
 		checkForUpdates();
 		clearScreen();
-		GL33.glUseProgram(programID);
-		sendMVPMatrix();
-		enableTriangles();
-		enableUVVertices();
-		drawTriangles();
-		disableVertexAttribArrays(1);
+		if (renderVertices) {
+			GL33.glUseProgram(programID);
+			sendMVPMatrix();
+			enableTriangles();
+			enableUVVertices();
+			drawTriangles();
+			disableVertexAttribArrays(1);
+		}
+	}
+	
+	@Handles({"STATE_UPDATE"})
+	@HandlesFor("Game State")
+	private void checkState(final Message message) {
+		String msg = message.messageText;
+		
+		if (msg.equals("STATE_UPDATE")) {
+			StateUpdateObject suo = (StateUpdateObject) message.data;
+			renderVertices = Boolean.parseBoolean(suo.newState.properties.getProperty("render_enabled"));
+		}
 	}
 	
 	private void drawTriangles() {
