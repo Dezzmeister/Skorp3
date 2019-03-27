@@ -10,6 +10,7 @@ import com.dezzy.skorp3.game.graphics.Renderer;
 import com.dezzy.skorp3.game.graphics.Texture;
 import com.dezzy.skorp3.game.graphics.geometry.Mesh;
 import com.dezzy.skorp3.game.graphics.geometry.Triangle;
+import com.dezzy.skorp3.game.graphics.geometry.composite.Square;
 import com.dezzy.skorp3.game.graphics.utils.TransformUtils;
 import com.dezzy.skorp3.game.input.KeyboardHandler;
 import com.dezzy.skorp3.game.input.MouseHandler;
@@ -64,16 +65,25 @@ public class FinalRendererTest {
 		
 		Triangle triangle = new Triangle(new Vec4(-1, -1, 0), new Vec4(1, -1, 0), new Vec4(0, 1, 0));
 		Texture wall512 = new Texture("assets/textures/wall512.png");
-		triangle.setTexture(wall512);
-		triangle.setUV(new Vec2(0, 0), new Vec2(1, 0), new Vec2(0.5f, 1));
+		Texture tabletop100 = new Texture("assets/textures/tabletop100.png");
 		
-		skorp.renderer2.sendTrianglesAndWait(new Triangle[] {triangle});
+		Square tableSquare = new Square().setTexture(tabletop100);
+		Square wallSquare = new Square().setTexture(wall512);
+		
+		Mat4 transformer = TransformUtils.rotateY(3.14159f/2.0f).multiply(TransformUtils.translate(1, 0, 1));
+		transformer.transform(wallSquare);
+		
+		triangle.setTexture(wall512);
+		triangle.setUV(new Vec2(0, 1), new Vec2(1, 1), new Vec2(0.5f, 0));
+		
+		//skorp.renderer2.sendTrianglesAndWait(new Triangle[] {triangle});
+		skorp.renderer2.sendTrianglesAndWait(wallSquare.add(tableSquare).triangles);
+		skorp.renderer2.enableRendering();
 		
 		Mat4 proj = TransformUtils.perspective((float)Math.PI / 4.0f, WIDTH/(float)HEIGHT, 0.1f, 100.0f);
 		
 		Vec4 pos = mainPlayer.position;
 		while (skorp.game.isRunning()) {
-			//System.out.println(mainPlayer.position);
 			Mat4 model = TransformUtils.rotateY(-mainPlayer.yaw).multiply(TransformUtils.translate(-pos.x, -pos.y, -pos.z));
 			
 			Mat4 mvpMatrix = proj.multiply(model);

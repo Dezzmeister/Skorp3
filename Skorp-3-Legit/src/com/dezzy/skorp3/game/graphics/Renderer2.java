@@ -40,7 +40,7 @@ public class Renderer2 {
 	private Texture[] textures;
 	private int[] textureIDs;
 	private volatile boolean updateTriangles = false;
-	private volatile boolean renderVertices = true;
+	private volatile boolean renderVertices = false;
 	
 	public Renderer2(final String vertShaderPath, final String fragShaderPath) {		
 		vaoID = createAndBindVAO();
@@ -57,7 +57,7 @@ public class Renderer2 {
 	public void render() {
 		checkForUpdates();
 		clearScreen();
-		if (renderVertices && triangles != null) {
+		if (renderVertices) {
 			GL33.glUseProgram(programID);
 			sendMVPMatrix();
 			enableTriangles();
@@ -67,6 +67,14 @@ public class Renderer2 {
 		}
 	}
 	
+	public void enableRendering() {
+		renderVertices = true;
+	}
+	
+	public void disableRendering() {
+		renderVertices = false;
+	}
+	
 	@Handles({"STATE_UPDATE"})
 	@HandlesFor("Game State")
 	private void checkState(final Message message) {
@@ -74,7 +82,7 @@ public class Renderer2 {
 		
 		if (msg.equals("STATE_UPDATE")) {
 			StateUpdateObject suo = (StateUpdateObject) message.data;
-			//renderVertices = Boolean.parseBoolean(suo.newState.properties.getProperty("render_enabled"));
+			renderVertices = Boolean.parseBoolean(suo.newState.properties.getProperty("render_enabled"));
 		}
 	}
 	
@@ -85,9 +93,14 @@ public class Renderer2 {
 			int id = t.tex.glTextureID;
 			int unit = t.tex.glImageUnit;
 			
+			/*
+			System.out.println("unit: " + unit);
+			System.out.println("id: " + id);
+			*/
+			
 			GL33.glActiveTexture(GL33.GL_TEXTURE0 + unit);
 			GL33.glBindTexture(GL33.GL_TEXTURE_2D, id);
-			GL33.glUniform1i(textureSamplerLocation, 0);
+			GL33.glUniform1i(textureSamplerLocation, unit);
 			GL33.glDrawArrays(GL33.GL_TRIANGLES, i * 3, 3);
 		}
 	}
@@ -107,7 +120,13 @@ public class Renderer2 {
 	
 	private Texture[] createTextureArray() {
 		int maxTextures = GL33.glGetInteger(GL33.GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS);
-		return new Texture[maxTextures];
+		Texture[] _textures = new Texture[maxTextures];
+		
+		for (int i = 0; i < _textures.length; i++) {
+			_textures[i] = null;
+		}
+		
+		return _textures;
 	}
 	
 	private void disableVertexAttribArrays(int upto) {
@@ -207,6 +226,8 @@ public class Renderer2 {
 			int id;
 			
 			if (!knownTextures.contains(tex)) {
+				knownTextures.add(tex);
+				
 				id = addTexture(tex);
 				tex.glTextureID = id;
 				

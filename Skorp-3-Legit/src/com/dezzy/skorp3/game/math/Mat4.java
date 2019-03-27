@@ -3,6 +3,9 @@ package com.dezzy.skorp3.game.math;
 import java.nio.FloatBuffer;
 import java.util.function.Consumer;
 
+import com.dezzy.skorp3.game.graphics.geometry.Mesh;
+import com.dezzy.skorp3.game.graphics.geometry.Triangle;
+
 public class Mat4 {
 	public static final Mat4 IDENTITY = new Mat4(new float[] {
 		1, 0, 0, 0,
@@ -29,6 +32,21 @@ public class Mat4 {
 				values[8] * vec.x + values[9] * vec.y + values[10] * vec.z + values[11] * vec.w,
 				values[12] * vec.x + values[13] * vec.y + values[14] * vec.z + values[15] * vec.w
 		);				
+	}
+	
+	/**
+	 * Transforms a mesh, applying the transformation to the existing mesh.
+	 * Multiplies this matrix by all of the mesh's triangles' vertices.
+	 * 
+	 * @param mesh mesh to be transformed
+	 */
+	public void transform(final Mesh mesh) {
+		for (int i = 0; i < mesh.triangles.length; i++) {
+			Triangle t = mesh.triangles[i];
+			t.v0 = multiply(t.v0);
+			t.v1 = multiply(t.v1);
+			t.v2 = multiply(t.v2);
+		}
 	}
 	
 	public Mat4 multiply(final Mat4 mat) {

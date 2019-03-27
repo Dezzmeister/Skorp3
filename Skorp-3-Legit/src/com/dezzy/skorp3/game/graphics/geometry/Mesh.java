@@ -19,7 +19,7 @@ public class Mesh {
 			newTriangles[i] = mesh.triangles[i - triangles.length];
 		}
 		
-		return new Mesh(triangles);
+		return new Mesh(newTriangles);
 	}
 	
 	public float[] getVBOVertices() {
