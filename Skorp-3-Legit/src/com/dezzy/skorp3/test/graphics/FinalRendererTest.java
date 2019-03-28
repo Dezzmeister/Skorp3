@@ -9,6 +9,7 @@ import com.dezzy.skorp3.game.actors.Player;
 import com.dezzy.skorp3.game.graphics.Renderer;
 import com.dezzy.skorp3.game.graphics.Texture;
 import com.dezzy.skorp3.game.graphics.geometry.Mesh;
+import com.dezzy.skorp3.game.graphics.geometry.OBJModel;
 import com.dezzy.skorp3.game.graphics.geometry.Triangle;
 import com.dezzy.skorp3.game.graphics.geometry.composite.Square;
 import com.dezzy.skorp3.game.graphics.utils.TransformUtils;
@@ -65,9 +66,9 @@ public class FinalRendererTest {
 		
 		Triangle triangle = new Triangle(new Vec4(-1, -1, 0), new Vec4(1, -1, 0), new Vec4(0, 1, 0));
 		Texture wall512 = new Texture("assets/textures/wall512.png");
-		Texture tabletop100 = new Texture("assets/textures/tabletop100.png");
+		Texture tabletop128 = new Texture("assets/textures/tabletop128.png");
 		
-		Square tableSquare = new Square().setTexture(tabletop100);
+		Square tableSquare = new Square().setTexture(tabletop128);
 		Square wallSquare = new Square().setTexture(wall512);
 		
 		Mat4 transformer = TransformUtils.rotateY(3.14159f/2.0f).multiply(TransformUtils.translate(1, 0, 1));
@@ -77,7 +78,11 @@ public class FinalRendererTest {
 		triangle.setUV(new Vec2(0, 1), new Vec2(1, 1), new Vec2(0.5f, 0));
 		
 		//skorp.renderer2.sendTrianglesAndWait(new Triangle[] {triangle});
-		skorp.renderer2.sendTrianglesAndWait(wallSquare.add(tableSquare).triangles);
+		Mesh cube = new OBJModel("assets/models/cube/cube.obj");
+		TransformUtils.scale(0.01f, 0.01f, 0.01f).transform(cube);
+		
+		//skorp.renderer2.sendTrianglesAndWait(wallSquare.add(tableSquare).triangles);
+		skorp.renderer2.sendTrianglesAndWait(cube.triangles);
 		skorp.renderer2.enableRendering();
 		
 		Mat4 proj = TransformUtils.perspective((float)Math.PI / 4.0f, WIDTH/(float)HEIGHT, 0.1f, 100.0f);
