@@ -1,23 +1,48 @@
 package com.dezzy.skorp3.game.graphics.geometry.composite;
 
 import com.dezzy.skorp3.game.graphics.geometry.Triangle;
+import com.dezzy.skorp3.game.math.Vec4;
+import com.dezzy.skorp3.logging.Logger;
 
 public class Mesh {
 	public Triangle[] triangles;
+	public Vec4[] normals;
+	
+	/**
+	 * Constructs a Mesh from triangles and vertex normals. The vertex normal array needs to be three times
+	 * the size of the triangle array.
+	 * 
+	 * @param _triangles triangles
+	 * @param _normals vertex normals
+	 */
+	public Mesh(final Triangle[] _triangles, final Vec4[] _normals) {
+		triangles = _triangles;
+		normals = _normals;
+		
+		if (normals.length != triangles.length * 3) {
+			triangles = null;
+			normals = null;
+			
+			Logger.error("Vertex normal array must be three times the size of the triangle array!");
+		}
+	}
 	
 	public Mesh(final Triangle ... _triangles) {
-		triangles = _triangles;
+		this(_triangles, null);
 	}
 	
 	public Mesh add(final Mesh mesh) {
 		Triangle[] newTriangles = new Triangle[triangles.length + mesh.triangles.length];
+		Vec4[] newNormals = new Vec4[(triangles.length + mesh.triangles.length) * 3];
 		
 		for (int i = 0; i < triangles.length; i++) {
 			newTriangles[i] = triangles[i];
+			newNormals[i] = normals[i];
 		}
 		
-		for (int i = triangles.length; i < newTriangles.length; i++) {
+		for (int i = normals.length; i < newNormals.length; i++) {
 			newTriangles[i] = mesh.triangles[i - triangles.length];
+			newNormals[i] = mesh.normals[i - normals.length];
 		}
 		
 		return new Mesh(newTriangles);

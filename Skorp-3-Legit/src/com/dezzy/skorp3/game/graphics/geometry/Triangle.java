@@ -9,6 +9,8 @@ public class Triangle {
 	public Vec4 v1;
 	public Vec4 v2;
 	
+	public Vec4 normal;
+	
 	public Vec4 v0c;
 	public Vec4 v1c;
 	public Vec4 v2c;
@@ -23,6 +25,8 @@ public class Triangle {
 		v0 = _v0;
 		v1 = _v1;
 		v2 = _v2;
+		
+		normal  = Vec4.cross(v0, v1);
 	}
 	
 	public Triangle setUV(final Vec2 _uv0, final Vec2 _uv1, final Vec2 _uv2) {

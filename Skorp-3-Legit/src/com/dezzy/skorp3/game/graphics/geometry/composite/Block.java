@@ -1,7 +1,12 @@
 package com.dezzy.skorp3.game.graphics.geometry.composite;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.dezzy.skorp3.game.graphics.Texture;
+import com.dezzy.skorp3.game.graphics.geometry.Triangle;
 import com.dezzy.skorp3.game.graphics.utils.TransformUtils;
+import com.dezzy.skorp3.game.math.Vec4;
 
 public class Block extends Mesh {
 	private static final float HALF_PI = (float)Math.PI / 2.0f;
@@ -29,5 +34,21 @@ public class Block extends Mesh {
 		TransformUtils.translate(0, -0.5f, 0).multiply(TransformUtils.rotateX(HALF_PI)).transform(faces[5]);
 		
 		this.triangles = faces[0].add(faces[1]).add(faces[2]).add(faces[3]).add(faces[4]).add(faces[5]).triangles;
+	}
+	
+	public Block resolveNormals() {
+		normals = new Vec4[8];
+		@SuppressWarnings("unchecked")
+		List<Triangle>[] connected = (List<Triangle>[]) new List[8];
+		
+		for (int i = 0; i < connected.length; i++) {
+			connected[i] = new ArrayList<Triangle>();
+		}
+		
+		for (int i = 0; i < triangles.length; i++) {
+			
+		}
+		
+		return this;
 	}
 }

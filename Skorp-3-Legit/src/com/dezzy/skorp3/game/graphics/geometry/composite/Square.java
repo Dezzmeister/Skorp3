@@ -8,7 +8,7 @@ import com.dezzy.skorp3.game.math.Vec4;
 public class Square extends Mesh {
 	
 	/**
-	 * Creates a 2 x 2 square on the XY plane.
+	 * Creates a 2 x 2 square on the XY plane. Does NOT set vertex normals!
 	 */
 	public Square() {
 		triangles = new Triangle[2];

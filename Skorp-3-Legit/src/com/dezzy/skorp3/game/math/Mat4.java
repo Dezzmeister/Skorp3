@@ -46,6 +46,8 @@ public class Mat4 {
 			t.v0 = multiply(t.v0);
 			t.v1 = multiply(t.v1);
 			t.v2 = multiply(t.v2);
+			
+			mesh.normals[i] = multiply(mesh.normals[i]);
 		}
 	}
 	

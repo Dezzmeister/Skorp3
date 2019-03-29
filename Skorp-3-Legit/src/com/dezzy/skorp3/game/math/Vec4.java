@@ -12,6 +12,8 @@ public class Vec4 {
 	public float z;
 	public float w;
 	
+	public int index = -1;
+	
 	/**
 	 * Creates a Vec4 with 4 components.
 	 * 
