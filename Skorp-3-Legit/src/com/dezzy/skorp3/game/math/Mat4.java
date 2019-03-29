@@ -3,8 +3,8 @@ package com.dezzy.skorp3.game.math;
 import java.nio.FloatBuffer;
 import java.util.function.Consumer;
 
-import com.dezzy.skorp3.game.graphics.geometry.Mesh;
 import com.dezzy.skorp3.game.graphics.geometry.Triangle;
+import com.dezzy.skorp3.game.graphics.geometry.composite.Mesh;
 
 public class Mat4 {
 	public static final Mat4 IDENTITY = new Mat4(new float[] {

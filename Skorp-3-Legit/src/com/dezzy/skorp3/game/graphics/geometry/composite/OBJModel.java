@@ -1,4 +1,4 @@
-package com.dezzy.skorp3.game.graphics.geometry;
+package com.dezzy.skorp3.game.graphics.geometry.composite;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.dezzy.skorp3.game.graphics.Texture;
+import com.dezzy.skorp3.game.graphics.geometry.Triangle;
 import com.dezzy.skorp3.game.math.Vec2;
 import com.dezzy.skorp3.game.math.Vec4;
 import com.dezzy.skorp3.logging.Logger;

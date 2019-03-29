@@ -8,9 +8,10 @@ import com.dezzy.skorp3.game.GameStarter;
 import com.dezzy.skorp3.game.actors.Player;
 import com.dezzy.skorp3.game.graphics.Renderer;
 import com.dezzy.skorp3.game.graphics.Texture;
-import com.dezzy.skorp3.game.graphics.geometry.Mesh;
-import com.dezzy.skorp3.game.graphics.geometry.OBJModel;
 import com.dezzy.skorp3.game.graphics.geometry.Triangle;
+import com.dezzy.skorp3.game.graphics.geometry.composite.Block;
+import com.dezzy.skorp3.game.graphics.geometry.composite.Mesh;
+import com.dezzy.skorp3.game.graphics.geometry.composite.OBJModel;
 import com.dezzy.skorp3.game.graphics.geometry.composite.Square;
 import com.dezzy.skorp3.game.graphics.utils.TransformUtils;
 import com.dezzy.skorp3.game.input.KeyboardHandler;
@@ -71,7 +72,7 @@ public class FinalRendererTest {
 		Square tableSquare = new Square().setTexture(tabletop128);
 		Square wallSquare = new Square().setTexture(wall512);
 		
-		Mat4 transformer = TransformUtils.rotateY(3.14159f/2.0f).multiply(TransformUtils.translate(1, 0, 1));
+		Mat4 transformer = TransformUtils.rotateY(3.14159f/2.0f).multiply(TransformUtils.translate(0.5f, 0, 0.5f));
 		transformer.transform(wallSquare);
 		
 		triangle.setTexture(wall512);
@@ -82,16 +83,22 @@ public class FinalRendererTest {
 		TransformUtils.scale(0.01f, 0.01f, 0.01f).transform(cube);
 		
 		//skorp.renderer2.sendTrianglesAndWait(wallSquare.add(tableSquare).triangles);
-		skorp.renderer2.sendTrianglesAndWait(cube.triangles);
+		Block block = new Block(tabletop128);
+		TransformUtils.translate(0, -1, 2).transform(block);
+		
+		Block block2 = new Block(wall512);
+		TransformUtils.translate(0, 0, 3).transform(block2);
+		skorp.renderer2.sendTrianglesAndWait(block.add(block2).triangles);
+		//skorp.renderer2.sendTrianglesAndWait(cube.triangles);
 		skorp.renderer2.enableRendering();
 		
 		Mat4 proj = TransformUtils.perspective((float)Math.PI / 4.0f, WIDTH/(float)HEIGHT, 0.1f, 100.0f);
 		
 		Vec4 pos = mainPlayer.position;
 		while (skorp.game.isRunning()) {
-			Mat4 model = TransformUtils.rotateY(-mainPlayer.yaw).multiply(TransformUtils.translate(-pos.x, -pos.y, -pos.z));
+			Mat4 view = TransformUtils.rotateY(-mainPlayer.yaw).multiply(TransformUtils.translate(-pos.x, -pos.y, -pos.z));
 			
-			Mat4 mvpMatrix = proj.multiply(model);
+			Mat4 mvpMatrix = proj.multiply(view);
 			skorp.renderer2.setMVPMatrix(mvpMatrix);
 		}
 	}

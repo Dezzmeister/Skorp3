@@ -1,11 +1,11 @@
-[16:37:47.440]	Logger created.
-[16:37:47.442]	Running on monitor with resolution 1920x1080
-[16:37:47.450]	Starting Skorp 3
-[16:37:48.258]	OpenGL version: 3.3.0 - Build 22.20.16.4749
-[16:37:48.259]	OpenGL texture units: 192
-[16:37:48.281]	Shader "shaders/vert1.glsl" compiled: YES
-[16:37:48.282]	Shader "shaders/frag1.glsl" compiled: YES
-[16:37:48.297]	OpenGL program linked: YES
-[16:37:48.298]	OpenGL program validated: YES
-[16:37:48.590]	OpenGL: UV data sent.
-[16:38:09.987]	Quitting GLFW
+[01:42:03.014]	Logger created.
+[01:42:03.015]	Running on monitor with resolution 1920x1080
+[01:42:03.061]	Starting Skorp 3
+[01:42:06.482]	OpenGL version: 3.3.0 - Build 22.20.16.4749
+[01:42:06.482]	OpenGL texture units: 192
+[01:42:06.569]	Shader "shaders/vert1.glsl" compiled: YES
+[01:42:06.574]	Shader "shaders/frag1.glsl" compiled: YES
+[01:42:06.584]	OpenGL program linked: YES
+[01:42:06.584]	OpenGL program validated: YES
+[01:42:06.757]	OpenGL: UV data sent.
+[01:43:01.999]	Quitting GLFW

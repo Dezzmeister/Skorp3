@@ -1,5 +1,6 @@
-package com.dezzy.skorp3.game.graphics.geometry;
+package com.dezzy.skorp3.game.graphics.geometry.composite;
 
+import com.dezzy.skorp3.game.graphics.geometry.Triangle;
 
 public class Mesh {
 	public Triangle[] triangles;

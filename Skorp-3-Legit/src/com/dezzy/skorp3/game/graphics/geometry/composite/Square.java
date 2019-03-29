@@ -1,7 +1,6 @@
 package com.dezzy.skorp3.game.graphics.geometry.composite;
 
 import com.dezzy.skorp3.game.graphics.Texture;
-import com.dezzy.skorp3.game.graphics.geometry.Mesh;
 import com.dezzy.skorp3.game.graphics.geometry.Triangle;
 import com.dezzy.skorp3.game.math.Vec2;
 import com.dezzy.skorp3.game.math.Vec4;
@@ -14,10 +13,10 @@ public class Square extends Mesh {
 	public Square() {
 		triangles = new Triangle[2];
 		
-		Vec4 v0 = new Vec4(-1, 1, 0);
-		Vec4 v1 = new Vec4(-1, -1, 0);
-		Vec4 v2 = new Vec4(1, -1, 0);
-		Vec4 v3 = new Vec4(1, 1, 0);
+		Vec4 v0 = new Vec4(-0.5f, 0.5f, 0);
+		Vec4 v1 = new Vec4(-0.5f, -0.5f, 0);
+		Vec4 v2 = new Vec4(0.5f, -0.5f, 0);
+		Vec4 v3 = new Vec4(0.5f, 0.5f, 0);
 		
 		triangles[0] = new Triangle(v0, v1, v2);
 		triangles[1] = new Triangle(v2, v3, v0);
