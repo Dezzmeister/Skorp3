@@ -35,20 +35,4 @@ public class Block extends Mesh {
 		
 		this.triangles = faces[0].add(faces[1]).add(faces[2]).add(faces[3]).add(faces[4]).add(faces[5]).triangles;
 	}
-	
-	public Block resolveNormals() {
-		normals = new Vec4[8];
-		@SuppressWarnings("unchecked")
-		List<Triangle>[] connected = (List<Triangle>[]) new List[8];
-		
-		for (int i = 0; i < connected.length; i++) {
-			connected[i] = new ArrayList<Triangle>();
-		}
-		
-		for (int i = 0; i < triangles.length; i++) {
-			
-		}
-		
-		return this;
-	}
 }

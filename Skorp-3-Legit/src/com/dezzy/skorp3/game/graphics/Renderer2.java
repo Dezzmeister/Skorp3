@@ -14,8 +14,10 @@ import org.lwjgl.opengl.GL33;
 import org.lwjgl.system.MemoryStack;
 
 import com.dezzy.skorp3.game.graphics.geometry.Triangle;
+import com.dezzy.skorp3.game.graphics.geometry.composite.Mesh;
 import com.dezzy.skorp3.game.graphics.utils.ShaderUtils;
 import com.dezzy.skorp3.game.math.Mat4;
+import com.dezzy.skorp3.game.math.Vec4;
 import com.dezzy.skorp3.game.state.StateUpdateObject;
 import com.dezzy.skorp3.logging.Logger;
 import com.dezzy.skorp3.messaging.Message;
@@ -25,33 +27,51 @@ import com.dezzy.skorp3.messaging.meta.HandlesFor;
 
 public class Renderer2 {
 	private final FloatBuffer mvpBuffer = BufferUtils.createFloatBuffer(16);
+	private final FloatBuffer viewBuffer = BufferUtils.createFloatBuffer(16);
+	private final FloatBuffer modelBuffer = BufferUtils.createFloatBuffer(16);
 	
 	private int vaoID;
 	private int vboID;
 	private int uvBuffer;
-	private int programID;
-	private int mvpMatrixLocation;
-	private int textureSamplerLocation;
-	private volatile Mat4 mvpMatrix = Mat4.IDENTITY;
+	private int normalBuffer;
 	
+	private int programID;
+	
+	private int mvpMatrixLocation;
+	private int viewMatrixLocation;
+	private int modelMatrixLocation;
+	private int textureSamplerLocation;
+	private int normalBufferLocation;
+	private int lightLocation;
+	
+	private volatile Mat4 mvpMatrix = Mat4.IDENTITY;
+	private volatile Mat4 viewMatrix = Mat4.IDENTITY;
+	private volatile Mat4 modelMatrix = Mat4.IDENTITY;
+	
+	private volatile Vec4 lightPos;
 	private float[] vertices;
 	private float[] uvVertices;
+	private float[] normals;
 	private Triangle[] triangles;
 	private Texture[] textures;
 	private int[] textureIDs;
 	private volatile boolean updateTriangles = false;
 	private volatile boolean renderVertices = false;
 	
+	
+	
 	public Renderer2(final String vertShaderPath, final String fragShaderPath) {		
 		vaoID = createAndBindVAO();
 		vboID = createVBO();
 		uvBuffer = createUVBuffer();
+		normalBuffer = createNormalBuffer();
 		textures = createTextureArray();
 		
 		programID = createGLProgram(vertShaderPath, fragShaderPath);
 		getShaderInputs();
 		
 		MessageHandlerRegistry.GAME_STATE_HANDLER.registerCallback(this::checkState);
+		MessageHandlerRegistry.CONTROL_HANDLER.registerCallback(this::checkControl);
 	}
 	
 	public void render() {
@@ -59,11 +79,13 @@ public class Renderer2 {
 		clearScreen();
 		if (renderVertices) {
 			GL33.glUseProgram(programID);
-			sendMVPMatrix();
+			sendMatrices();
+			GL33.glUniform3f(lightLocation, lightPos.x, lightPos.y, lightPos.z);
 			enableTriangles();
 			enableUVVertices();
+			enableNormals();
 			drawTriangles();
-			disableVertexAttribArrays(1);
+			disableVertexAttribArrays(2);
 		}
 	}
 	
@@ -86,6 +108,21 @@ public class Renderer2 {
 		}
 	}
 	
+	@Handles({"QUIT"})
+	@HandlesFor("Control")
+	private void checkControl(final Message message) {
+		String msg = message.messageText;
+		
+		if (msg.equals("QUIT")) {
+			terminate();
+		}
+	}
+	
+	//TODO: Write this
+	private void terminate() {
+		
+	}
+	
 	private void drawTriangles() {
 		
 		for (int i = 0; i < triangles.length; i++) {
@@ -106,6 +143,19 @@ public class Renderer2 {
 	}
 	
 	private int createUVBuffer() {
+		int id;
+		
+		try (MemoryStack stack = MemoryStack.stackPush()) {
+			IntBuffer buf = stack.mallocInt(1);
+			
+			GL33.glGenBuffers(buf);
+			id = buf.get(0);
+		}
+		
+		return id;
+	}
+	
+	private int createNormalBuffer() {
 		int id;
 		
 		try (MemoryStack stack = MemoryStack.stackPush()) {
@@ -147,10 +197,24 @@ public class Renderer2 {
 		GL33.glVertexAttribPointer(1, 2, GL33.GL_FLOAT, false, 0, 0);
 	}
 	
-	private void sendMVPMatrix() {
+	private void enableNormals() {
+		GL33.glEnableVertexAttribArray(2);
+		GL33.glBindBuffer(GL33.GL_ARRAY_BUFFER, normalBuffer);
+		GL33.glVertexAttribPointer(2, 3, GL33.GL_FLOAT, false, 0, 0);
+	}
+	
+	private void sendMatrices() {
 		mvpMatrix.store(mvpBuffer);
 		mvpBuffer.flip();
 		GL33.glUniformMatrix4fv(mvpMatrixLocation, true, mvpBuffer);
+		
+		viewMatrix.store(viewBuffer);
+		viewBuffer.flip();
+		GL33.glUniformMatrix4fv(viewMatrixLocation, true, viewBuffer);
+		
+		modelMatrix.store(modelBuffer);
+		modelBuffer.flip();
+		GL33.glUniformMatrix4fv(modelMatrixLocation, true, modelBuffer);
 	}
 	
 	private void clearScreen() {
@@ -171,13 +235,25 @@ public class Renderer2 {
 		Logger.log("OpenGL: UV data sent.");
 	}
 	
-	public void sendTriangles(final Triangle[] _triangles) {
-		triangles = _triangles;
+	public void sendTriangles(final Mesh mesh) {
+		triangles = mesh.triangles;
+		normals = new float[mesh.normals.length * 3];
+		
+		for (int i = 0; i < mesh.normals.length; i++) {
+			Vec4 normal = mesh.normals[i];
+			
+			int offset = i * 3;
+			normals[offset] = normal.x;
+			normals[offset + 1] = normal.y;
+			normals[offset + 2] = normal.z;
+		}
+		
+		//This must be the LAST line of this function!!
 		updateTriangles = true;
 	}
 	
-	public void sendTrianglesAndWait(final Triangle[] _triangles) {
-		sendTriangles(_triangles);
+	public void sendTrianglesAndWait(final Mesh mesh) {
+		sendTriangles(mesh);
 		
 		while (updateTriangles);
 	}
@@ -247,6 +323,9 @@ public class Renderer2 {
 			textureIDs[i] = id;
 		}
 		
+		GL33.glBindBuffer(GL33.GL_ARRAY_BUFFER, normalBuffer);
+		GL33.glBufferData(GL33.GL_ARRAY_BUFFER, normals, GL33.GL_STATIC_DRAW);
+		
 		GL33.glBindBuffer(GL33.GL_ARRAY_BUFFER, vboID);
 		GL33.glBufferData(GL33.GL_ARRAY_BUFFER, vertices, GL33.GL_STATIC_DRAW);
 		
@@ -310,6 +389,10 @@ public class Renderer2 {
 	private void getShaderInputs() {
 		mvpMatrixLocation = GL33.glGetUniformLocation(programID, "MVP");
 		textureSamplerLocation = GL33.glGetUniformLocation(programID, "textureSampler");
+		viewMatrixLocation = GL33.glGetUniformLocation(programID, "V");
+		modelMatrixLocation = GL33.glGetUniformLocation(programID, "M");
+		lightLocation = GL33.glGetUniformLocation(programID, "lightPosWS");
+		//normalBufferLocation = GL33.glGetUniformLocation(programID, "normalBuffer");
 	}
 	
 	private int createGLProgram(final String vertShaderPath, final String fragShaderPath) {
@@ -335,5 +418,15 @@ public class Renderer2 {
 	 */
 	public void setMVPMatrix(final Mat4 _mvpMatrix) {
 		mvpMatrix = _mvpMatrix;
+	}
+	
+	public void setMatrices(final Mat4 _mvpMatrix, final Mat4 _viewMatrix, final Mat4 _modelMatrix) {
+		mvpMatrix = _mvpMatrix;
+		viewMatrix = _viewMatrix;
+		modelMatrix = _modelMatrix;
+	}
+	
+	public void setLightPos(final Vec4 _lightPos) {
+		lightPos = _lightPos;
 	}
 }

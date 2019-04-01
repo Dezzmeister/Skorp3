@@ -26,7 +26,7 @@ public class Triangle {
 		v1 = _v1;
 		v2 = _v2;
 		
-		normal  = Vec4.cross(v0, v1);
+		normal  = Vec4.cross(v1.minus(v0), v2.minus(v0)).normalize();
 	}
 	
 	public Triangle setUV(final Vec2 _uv0, final Vec2 _uv1, final Vec2 _uv2) {

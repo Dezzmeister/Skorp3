@@ -12,4 +12,5 @@ import static com.dezzy.skorp3.messaging.MessageHandler.*;
 public class MessageHandlerRegistry extends RequiresForcedLoading {
 	public static final MessageHandler GAME_STATE_HANDLER = createHandler("Game State");
 	
+	public static final MessageHandler CONTROL_HANDLER = createHandler("Control");
 }

@@ -1,5 +1,7 @@
 package com.dezzy.skorp3.game.math;
 
+import java.util.Objects;
+
 /**
  * Represents either a point or a direction in 3D space. The w component should be set to 1 to represent a point
  * and 0 to represent a direction. 
@@ -11,6 +13,8 @@ public class Vec4 {
 	public float y;
 	public float z;
 	public float w;
+	
+	public Vec4 normal;
 	
 	public int index = -1;
 	
@@ -126,5 +130,40 @@ public class Vec4 {
 	@Override
 	public String toString() {
 		return "(" + x + "," + y + "," + z + "," + w + ")";
+	}
+	
+	private static final int PLACES = 4;
+	
+	@Override
+	public boolean equals(final Object v) {
+		if (this == v) {
+			return true;
+		}
+		
+		if (!(v instanceof Vec4)) {
+			return false;
+		}
+		
+		Vec4 vec = (Vec4) v;
+		return (round(x, PLACES) == round(vec.x, PLACES)) && 
+			   (round(y, PLACES) == round(vec.y, PLACES)) && 
+			   (round(z, PLACES) == round(vec.z, PLACES));
+	}
+	
+	@Override
+	public int hashCode() {
+		
+		float x0 = round(x, PLACES);
+		
+		float y0 = round(x, PLACES);
+		
+		float z0 = round(x, PLACES);
+		
+		return Objects.hash(x0, y0, z0);
+	}
+	
+	private static float round(float value, int places) {
+		double scale = Math.pow(10, places);
+		return (float) (Math.round(value * scale) / scale);
 	}
 }

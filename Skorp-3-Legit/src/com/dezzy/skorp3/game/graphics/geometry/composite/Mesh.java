@@ -1,8 +1,13 @@
 package com.dezzy.skorp3.game.graphics.geometry.composite;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import com.dezzy.skorp3.game.graphics.geometry.Triangle;
 import com.dezzy.skorp3.game.math.Vec4;
-import com.dezzy.skorp3.logging.Logger;
 
 public class Mesh {
 	public Triangle[] triangles;
@@ -19,11 +24,9 @@ public class Mesh {
 		triangles = _triangles;
 		normals = _normals;
 		
-		if (normals.length != triangles.length * 3) {
+		if (normals != null && (normals.length != triangles.length * 3)) {
 			triangles = null;
 			normals = null;
-			
-			Logger.error("Vertex normal array must be three times the size of the triangle array!");
 		}
 	}
 	
@@ -33,16 +36,13 @@ public class Mesh {
 	
 	public Mesh add(final Mesh mesh) {
 		Triangle[] newTriangles = new Triangle[triangles.length + mesh.triangles.length];
-		Vec4[] newNormals = new Vec4[(triangles.length + mesh.triangles.length) * 3];
 		
 		for (int i = 0; i < triangles.length; i++) {
 			newTriangles[i] = triangles[i];
-			newNormals[i] = normals[i];
 		}
 		
-		for (int i = normals.length; i < newNormals.length; i++) {
+		for (int i = triangles.length; i < newTriangles.length; i++) {
 			newTriangles[i] = mesh.triangles[i - triangles.length];
-			newNormals[i] = mesh.normals[i - normals.length];
 		}
 		
 		return new Mesh(newTriangles);
@@ -92,5 +92,74 @@ public class Mesh {
 		}
 		
 		return colors;
+	}
+	
+	public void resolveNormals() {
+		Map<Vec4, List<Triangle>> connectedTriangles = new HashMap<Vec4, List<Triangle>>();
+		
+		for (int i = 0; i < triangles.length; i++) {
+			Triangle t = triangles[i];
+			
+			Vec4 v0 = t.v0;
+			Vec4 v1 = t.v1;
+			Vec4 v2 = t.v2;
+			
+			addTriangleForVertex(connectedTriangles, v0, t);
+			addTriangleForVertex(connectedTriangles, v1, t);
+			addTriangleForVertex(connectedTriangles, v2, t);
+		}
+		
+		int index = 0;
+		for (Entry<Vec4, List<Triangle>> entry : connectedTriangles.entrySet()) {
+			Vec4 normal = new Vec4(0, 0, 0);
+			Vec4 vertex = entry.getKey();
+			List<Triangle> triangles = entry.getValue();
+			
+			for (Triangle t : triangles) {
+				normal = normal.plus(t.normal);
+			}
+			
+			normal = normal.normalize();
+			
+			for (int i = 0; i < triangles.size(); i++) {
+				Triangle t = triangles.get(i);
+				
+				if (t.v0.equals(vertex)) {
+					t.v0.normal = normal;
+				}
+				
+				if (t.v1.equals(vertex)) {
+					t.v1.normal = normal;
+				}
+				
+				if (t.v2.equals(vertex)) {
+					t.v2.normal = normal;
+				}
+			}
+			
+			index++;
+		}
+		
+		normals = new Vec4[triangles.length * 3];
+		for (int i = 0; i < triangles.length; i++) {
+			Triangle t = triangles[i];			
+			int offset = i * 3;
+			
+			normals[offset] = t.v0.normal;
+			normals[offset + 1] = t.v1.normal;
+			normals[offset + 2] = t.v2.normal;
+		}
+	}
+	
+	private void addTriangleForVertex(final Map<Vec4, List<Triangle>> connectedTriangles, final Vec4 vec, final Triangle triangle) {
+		if (connectedTriangles.get(vec) == null) {
+			
+			List<Triangle> triangles = new ArrayList<Triangle>();
+			triangles.add(triangle);
+			
+			connectedTriangles.put(vec, triangles);
+		} else {
+			connectedTriangles.get(vec).add(triangle);
+		}
 	}
 }
