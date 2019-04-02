@@ -41,14 +41,13 @@ public class Renderer2 {
 	private int viewMatrixLocation;
 	private int modelMatrixLocation;
 	private int textureSamplerLocation;
-	private int normalBufferLocation;
 	private int lightLocation;
 	
 	private volatile Mat4 mvpMatrix = Mat4.IDENTITY;
 	private volatile Mat4 viewMatrix = Mat4.IDENTITY;
 	private volatile Mat4 modelMatrix = Mat4.IDENTITY;
 	
-	private volatile Vec4 lightPos;
+	private volatile Vec4 lightPos = new Vec4(-5, 0, 0);
 	private float[] vertices;
 	private float[] uvVertices;
 	private float[] normals;
@@ -210,11 +209,11 @@ public class Renderer2 {
 		
 		viewMatrix.store(viewBuffer);
 		viewBuffer.flip();
-		GL33.glUniformMatrix4fv(viewMatrixLocation, true, viewBuffer);
+		GL33.glUniformMatrix4fv(viewMatrixLocation, false, viewBuffer);
 		
 		modelMatrix.store(modelBuffer);
 		modelBuffer.flip();
-		GL33.glUniformMatrix4fv(modelMatrixLocation, true, modelBuffer);
+		GL33.glUniformMatrix4fv(modelMatrixLocation, false, modelBuffer);
 	}
 	
 	private void clearScreen() {

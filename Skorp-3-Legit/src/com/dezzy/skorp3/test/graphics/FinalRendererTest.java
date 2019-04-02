@@ -63,53 +63,25 @@ public class FinalRendererTest {
 			}
 		});
 		
-		//Triangle triangle = new Triangle(new Vec4(-1, -1, 0), new Vec4(1, -1, 0), new Vec4(0, 1, 0));
+		
 		Texture wall512 = new Texture("assets/textures/wall512.png");
-		//Texture tabletop128 = new Texture("assets/textures/tabletop128.png");
-		/*
-		Square tableSquare = new Square().setTexture(tabletop128);
-		Square wallSquare = new Square().setTexture(wall512);
-		
-		Mat4 transformer = TransformUtils.rotateY(3.14159f/2.0f).multiply(TransformUtils.translate(0.5f, 0, 0.5f));
-		transformer.transform(wallSquare);
-		
-		
-		triangle.setTexture(wall512);
-		triangle.setUV(new Vec2(0, 1), new Vec2(1, 1), new Vec2(0.5f, 0));
-		
-		//skorp.renderer2.sendTrianglesAndWait(new Triangle[] {triangle});
-		Mesh cube = new OBJModel("assets/models/cube/cube.obj");
-		TransformUtils.scale(0.01f, 0.01f, 0.01f).transform(cube);
-		
-		//skorp.renderer2.sendTrianglesAndWait(wallSquare.add(tableSquare).triangles);
-		Block block = new Block(tabletop128);
-		TransformUtils.translate(0, -1, 2).transform(block);
-		
-		Block block2 = new Block(wall512);
-		TransformUtils.translate(0, 0, 3).transform(block2);
-		//skorp.renderer2.sendTrianglesAndWait(block.add(block2).triangles);
-		*/
 		Block joj = new Block(wall512);
-		TransformUtils.translate(0, 0, -4).transform(joj);
+		//TransformUtils.translate(0, 0, -4).transform(joj);
 		
 		joj.resolveNormals();	
 		
 		skorp.renderer2.sendTrianglesAndWait(joj);
-		//Mesh donut = new OBJModel("assets/models/donut/donut.obj");
-		//TransformUtils.scale(0.01f, 0.01f, 0.01f).transform(donut);
-		
-		//skorp.renderer2.sendTrianglesAndWait(donut.triangles);
-		//skorp.renderer2.sendTrianglesAndWait(cube.triangles);
 		skorp.renderer2.enableRendering();
 		
 		Mat4 proj = TransformUtils.perspective((float)Math.PI / 4.0f, WIDTH/(float)HEIGHT, 0.1f, 100.0f);
 		
 		Vec4 pos = mainPlayer.position;
 		while (skorp.game.isRunning()) {
+			Mat4 model = Mat4.IDENTITY;
 			Mat4 view = TransformUtils.rotateY(-mainPlayer.yaw).multiply(TransformUtils.translate(-pos.x, -pos.y, -pos.z));
 			
-			Mat4 mvpMatrix = proj.multiply(view);
-			skorp.renderer2.setMVPMatrix(mvpMatrix);
+			Mat4 mvpMatrix = proj.multiply(view).multiply(model);
+			skorp.renderer2.setMatrices(mvpMatrix, view, model);
 		}
 	}
 	

@@ -1,12 +1,7 @@
 package com.dezzy.skorp3.game.graphics.geometry.composite;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.dezzy.skorp3.game.graphics.Texture;
-import com.dezzy.skorp3.game.graphics.geometry.Triangle;
 import com.dezzy.skorp3.game.graphics.utils.TransformUtils;
-import com.dezzy.skorp3.game.math.Vec4;
 
 public class Block extends Mesh {
 	private static final float HALF_PI = (float)Math.PI / 2.0f;

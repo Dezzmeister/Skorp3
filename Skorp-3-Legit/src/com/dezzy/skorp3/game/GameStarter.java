@@ -70,7 +70,8 @@ public class GameStarter implements Runnable {
 			
 			renderer.setMVPMatrix(Mat4.IDENTITY);
 		} else {
-			renderer2 = new Renderer2("shaders/vert1.glsl", "shaders/frag1.glsl");
+			//vert1 and frag1 for textures, vert2 and frag2 for textures with shading
+			renderer2 = new Renderer2("shaders/vert2.glsl", "shaders/frag2.glsl");
 			game.setRenderer2(renderer2);
 		}
 		
