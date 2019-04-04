@@ -25,7 +25,7 @@ import com.dezzy.skorp3.messaging.MessageHandlerRegistry;
 import com.dezzy.skorp3.messaging.meta.Handles;
 import com.dezzy.skorp3.messaging.meta.HandlesFor;
 
-public class Renderer2 {
+public class Renderer2 extends GLRenderer {
 	private final FloatBuffer mvpBuffer = BufferUtils.createFloatBuffer(16);
 	private final FloatBuffer viewBuffer = BufferUtils.createFloatBuffer(16);
 	private final FloatBuffer modelBuffer = BufferUtils.createFloatBuffer(16);
@@ -73,6 +73,7 @@ public class Renderer2 {
 		MessageHandlerRegistry.CONTROL_HANDLER.registerCallback(this::checkControl);
 	}
 	
+	@Override
 	public void render() {
 		checkForUpdates();
 		clearScreen();
