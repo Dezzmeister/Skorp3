@@ -1,10 +1,29 @@
-Skorp 3 Messaging Outline
-
-Class "MessageTest":
+=============Skorp 3 Messaging Outline=============
+=======THIS FILE WAS AUTOMATICALLY GENERATED=======
+
+Class "Renderer2":
+	Method "checkState":
+		Handles: {STATE_UPDATE}
+		For: Game State
+	Method "checkControl":
+		Handles: {QUIT}
+		For: Control
+Class "MouseHandler":
+	Method "handleStateUpdates":
+		Handles: {STATE_UPDATE}
+		For: Game State
+Class "MessageTest":
 	Method "controlCallbackFunc":
 		Handles: {QUIT}
 		For: Control
-Class "WindowTest":
+Class "Game":
+	Method "run":
+		Sends: {QUIT}
+		To: {Global}
+	Method "postNewState":
+		Sends: {STATE_UPDATE}
+		To: {Game State}
+Class "WindowTest":
 	Method "loop":
 		Sends: {QUIT}
 		To: {Global}

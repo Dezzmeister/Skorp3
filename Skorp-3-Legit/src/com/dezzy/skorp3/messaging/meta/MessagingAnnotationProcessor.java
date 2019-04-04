@@ -34,6 +34,7 @@ public class MessagingAnnotationProcessor {
 	public static void processMessagingAnnotations() {
 		List<Path> paths = getClassfilePaths("target");
 		
+		//Include backslash at end of path
 		String classRoot = "target\\classes\\";
 		Class[] classes = loadClasses(classRoot, paths);
 		CallbackUserMetaStruct[] callbackUserInfo = getCallbackUserMetaInfo(classes);
@@ -58,10 +59,12 @@ public class MessagingAnnotationProcessor {
 	}
 	
 	private static String buildOutlineFile(final List<OutlineFileEntry> entries) {
-		StringBuilder sb = new StringBuilder("Skorp 3 Messaging Outline\n\n");
+		System.getProperty("line.separator");
+		String nl = System.lineSeparator();
+		StringBuilder sb = new StringBuilder("=============Skorp 3 Messaging Outline=============" + nl + "=======THIS FILE WAS AUTOMATICALLY GENERATED=======" + nl + nl);
 		
 		for (OutlineFileEntry entry : entries) {
-			sb.append("Class \"" + entry.classType.getSimpleName() + "\":\n");
+			sb.append("Class \"" + entry.classType.getSimpleName() + "\":" + nl);
 			sb.append(getCallbackUserInfoString(entry.cbUserInfo, 1));
 			sb.append(getSenderUserInfoString(entry.senderUserInfo, 1));
 		}

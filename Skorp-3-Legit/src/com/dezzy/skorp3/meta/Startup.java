@@ -1,7 +1,5 @@
 package com.dezzy.skorp3.meta;
 
-import com.dezzy.skorp3.messaging.MessageHandlerRegistry;
-
 /**
  * Handles preliminary tasks before the game actually begins.
  *
@@ -14,6 +12,6 @@ public class Startup {
 	 */
 	public static void start() {
 		MetaUtilities.init();
-		MessageHandlerRegistry.init();
+		//MessageHandlerRegistry.init();
 	}
 }

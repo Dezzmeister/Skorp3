@@ -1,0 +1,10 @@
+Skorp 3 Messaging Outline
+
+Class "MessageTest":
+	Method "controlCallbackFunc":
+		Handles: {QUIT}
+		For: Control
+Class "WindowTest":
+	Method "loop":
+		Sends: {QUIT}
+		To: {Global}
