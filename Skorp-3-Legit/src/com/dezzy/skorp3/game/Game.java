@@ -144,6 +144,7 @@ public class Game implements Runnable {
 		GL.createCapabilities();
 		Logger.log("OpenGL version: " + GL33.glGetString(GL33.GL_VERSION));
 		Logger.log("OpenGL texture units: " + GL33.glGetInteger(GL33.GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS));
+		Logger.log("OpenGL max vertex attribs: " + GL33.glGetInteger(GL33.GL_MAX_VERTEX_ATTRIBS));
 		
 		GL33.glEnable(GL33.GL_DEPTH_TEST);
 		GL33.glDepthFunc(GL33.GL_LESS);

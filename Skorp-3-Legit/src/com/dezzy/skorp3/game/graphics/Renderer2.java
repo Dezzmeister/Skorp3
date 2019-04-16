@@ -15,6 +15,7 @@ import org.lwjgl.system.MemoryStack;
 
 import com.dezzy.skorp3.game.graphics.geometry.Triangle;
 import com.dezzy.skorp3.game.graphics.geometry.composite.Mesh;
+import com.dezzy.skorp3.game.graphics.rendering.GLRenderer;
 import com.dezzy.skorp3.game.graphics.utils.ShaderUtils;
 import com.dezzy.skorp3.game.math.Mat4;
 import com.dezzy.skorp3.game.math.Vec4;

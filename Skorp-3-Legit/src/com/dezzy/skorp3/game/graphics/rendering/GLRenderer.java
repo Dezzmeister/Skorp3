@@ -1,4 +1,4 @@
-package com.dezzy.skorp3.game.graphics;
+package com.dezzy.skorp3.game.graphics.rendering;
 
 public abstract class GLRenderer {
 	
