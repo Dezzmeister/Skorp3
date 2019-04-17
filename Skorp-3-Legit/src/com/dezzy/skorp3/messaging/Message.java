@@ -9,6 +9,12 @@ public final class Message {
 	public final String messageText;
 	public final Object data;
 	
+	/**
+	 * Creates a Message object with the specified text identifier and the specified data. The data will be passed to a message handler for the text identifier.
+	 * 
+	 * @param _messageText text identifier
+	 * @param _data message data
+	 */
 	public Message(final String _messageText, final Object _data) {
 		messageText = _messageText;
 		data = _data;
