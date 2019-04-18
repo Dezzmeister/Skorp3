@@ -1,12 +1,15 @@
 package com.dezzy.skorp3.game.graphics.rendering;
 
+import java.util.concurrent.ArrayBlockingQueue;
+
 import com.dezzy.skorp3.game.graphics.geometry.composite.Mesh;
+import com.dezzy.skorp3.messaging.DesignatedCaller;
 import com.dezzy.skorp3.messaging.Message;
 import com.dezzy.skorp3.messaging.MessageHandler;
 import com.dezzy.skorp3.messaging.meta.Sends;
 import com.dezzy.skorp3.messaging.meta.SendsTo;
 
-public class GL33Renderer {
+public class GL33Renderer extends DesignatedCaller {
 	/**
 	 * Internal event stream to facilitate communication between caller/control threads and the renderer thread.
 	 * OpenGL only allows one thread to make GL calls for a context, so any external calls must be piped through
@@ -24,6 +27,8 @@ public class GL33Renderer {
 	private final String fragShaderPath;
 	
 	public GL33Renderer(final String _vertShaderPath, final String _fragShaderPath) {
+		super(new ArrayBlockingQueue<CallTask>(20));
+		
 		internalPipe = MessageHandler.createHandler(INTERNAL_PIPE_NAME);
 		
 		vertShaderPath = _vertShaderPath;
