@@ -12,6 +12,5 @@ public class Startup {
 	 */
 	public static void start() {
 		MetaUtilities.init();
-		//MessageHandlerRegistry.init();
 	}
 }

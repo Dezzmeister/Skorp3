@@ -109,7 +109,6 @@ public class Mesh {
 			addTriangleForVertex(connectedTriangles, v2, t);
 		}
 		
-		int index = 0;
 		for (Entry<Vec4, List<Triangle>> entry : connectedTriangles.entrySet()) {
 			Vec4 normal = new Vec4(0, 0, 0);
 			Vec4 vertex = entry.getKey();
@@ -136,8 +135,6 @@ public class Mesh {
 					t.v2.normal = normal;
 				}
 			}
-			
-			index++;
 		}
 		
 		normals = new Vec4[triangles.length * 3];

@@ -1,12 +1,2 @@
-[13:55:22.060]	Logger created.
-[13:55:22.061]	Running on monitor with resolution 1920x1080
-[13:55:22.103]	Starting Skorp 3
-[13:55:33.605]	OpenGL version: 3.3.0 - Build 22.20.16.4749
-[13:55:33.606]	OpenGL texture units: 192
-[13:55:33.606]	OpenGL max vertex attribs: 16
-[13:55:36.438]	Shader "shaders/vert2.glsl" compiled: YES
-[13:55:36.619]	Shader "shaders/frag2.glsl" compiled: YES
-[13:55:38.437]	OpenGL program linked: YES
-[13:55:38.476]	OpenGL program validated: YES
-[13:55:41.369]	OpenGL: UV data sent.
-[13:56:00.310]	Quitting GLFW
+[16:43:18.716]	Logger created.
+[16:43:18.717]	ERROR: MessageHandler "Control" does not exist!
