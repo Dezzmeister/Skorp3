@@ -3,9 +3,7 @@ package com.dezzy.skorp3.game.graphics.rendering;
 import static com.dezzy.skorp3.game.graphics.rendering.shader.ShaderCapability.MATRICES;
 import static com.dezzy.skorp3.game.graphics.rendering.shader.ShaderCapability.TEXTURES;
 import static com.dezzy.skorp3.game.graphics.rendering.shader.ShaderCapability.VERTICES;
-import static com.dezzy.skorp3.game.graphics.rendering.shader.ShaderSubCapability.MODEL_MATRIX;
-import static com.dezzy.skorp3.game.graphics.rendering.shader.ShaderSubCapability.MVP_MATRIX;
-import static com.dezzy.skorp3.game.graphics.rendering.shader.ShaderSubCapability.VIEW_MATRIX;
+import static com.dezzy.skorp3.game.graphics.rendering.shader.ShaderSubCapability.*;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -128,6 +126,8 @@ public final class GL33Renderer extends DesignatedCaller {
 		private Triangle[] triangles;
 		
 		private final FloatBuffer modelMatrixBuffer = BufferUtils.createFloatBuffer(16);
+		private final FloatBuffer viewMatrixBuffer = BufferUtils.createFloatBuffer(16);
+		private final FloatBuffer mvpMatrixBuffer = BufferUtils.createFloatBuffer(16);
 		
 		public Renderable() {
 			
@@ -144,19 +144,25 @@ public final class GL33Renderer extends DesignatedCaller {
 		private void setMatrices(final Mat4 model, final Mat4 view, final Mat4 MVP) {
 			if (shaders.isCapableOf(MATRICES)) {
 				if (shaders.isCapableOf(MODEL_MATRIX)) {
-					
+					model.store(modelMatrixBuffer);
+					modelMatrixBuffer.flip();
+					GL33.glUniformMatrix4fv(shaders.getGLLocationOf(MODEL_MATRIX), false, modelMatrixBuffer);
 				} else {
 					Logger.error(unsupported(MODEL_MATRIX));
 				}
 				
 				if (shaders.isCapableOf(VIEW_MATRIX)) {
-					
+					view.store(viewMatrixBuffer);
+					viewMatrixBuffer.flip();
+					GL33.glUniformMatrix4fv(shaders.getGLLocationOf(VIEW_MATRIX), false, viewMatrixBuffer);
 				} else {
 					Logger.error(unsupported(VIEW_MATRIX));
 				}
 				
 				if (shaders.isCapableOf(MVP_MATRIX)) {
-					
+					MVP.store(mvpMatrixBuffer);
+					mvpMatrixBuffer.flip();
+					GL33.glUniformMatrix4fv(shaders.getGLLocationOf(MVP_MATRIX), true, mvpMatrixBuffer);
 				} else {
 					Logger.error(unsupported(MVP_MATRIX));
 				}
@@ -246,14 +252,20 @@ public final class GL33Renderer extends DesignatedCaller {
 				textureIDs[i] = id;
 			}
 			
-			GL33.glBindBuffer(GL33.GL_ARRAY_BUFFER, normalBuffer);
-			GL33.glBufferData(GL33.GL_ARRAY_BUFFER, normals, GL33.GL_STATIC_DRAW);
+			if (shaders.isCapableOf((VERTEX_NORMAL))) {
+				GL33.glBindBuffer(GL33.GL_ARRAY_BUFFER, normalBuffer);
+				GL33.glBufferData(GL33.GL_ARRAY_BUFFER, normals, GL33.GL_STATIC_DRAW);
+			}
 			
-			GL33.glBindBuffer(GL33.GL_ARRAY_BUFFER, vboID);
-			GL33.glBufferData(GL33.GL_ARRAY_BUFFER, vertices, GL33.GL_STATIC_DRAW);
+			if (shaders.isCapableOf(VERTICES)) {
+				GL33.glBindBuffer(GL33.GL_ARRAY_BUFFER, vboID);
+				GL33.glBufferData(GL33.GL_ARRAY_BUFFER, vertices, GL33.GL_STATIC_DRAW);
+			}
 			
-			GL33.glBindBuffer(GL33.GL_ARRAY_BUFFER, uvBuffer);
-			GL33.glBufferData(GL33.GL_ARRAY_BUFFER, uvVertices, GL33.GL_STATIC_DRAW);
+			if (shaders.isCapableOf(VERTEX_UV)) {
+				GL33.glBindBuffer(GL33.GL_ARRAY_BUFFER, uvBuffer);
+				GL33.glBufferData(GL33.GL_ARRAY_BUFFER, uvVertices, GL33.GL_STATIC_DRAW);
+			}
 		}
 		
 		private int createVBO() {
@@ -336,14 +348,5 @@ public final class GL33Renderer extends DesignatedCaller {
 			MVP = _MVP;
 			mesh = _mesh;
 		}
-	}
-	
-	/**
-	 * Pointers to uniform members in the vertex and fragment shaders.
-	 *
-	 * @author Joe Desmond
-	 */
-	private class Uniforms {
-		
 	}
 }

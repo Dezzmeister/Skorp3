@@ -57,6 +57,16 @@ public class ShaderPair {
 		locations.put(subCapability, location);
 	}
 	
+	public int getGLLocationOf(final ShaderSubCapability subCapability) {
+		Location location = locations.get(subCapability);
+		if (location == null) {
+			Logger.error(toString() + " does not support " + subCapability);
+			return -1;
+		} else {
+			return location.glLocation;
+		}
+	}
+	
 	public int loadVertexShader() throws IOException {
 		return ShaderUtils.loadShader(vertexShaderPath, GL33.GL_VERTEX_SHADER);
 	}
