@@ -8,11 +8,11 @@ public enum ShaderSubCapability {
 	VERTEX_NORMAL,
 	
 	//Matrix capabilites
-	MODEL,
-	VIEW,
-	PROJECTION,
-	MODELVIEW,
-	MVP,
+	MODEL_MATRIX,
+	VIEW_MATRIX,
+	PROJECTION_MATRIX,
+	MODELVIEW_MATRIX,
+	MVP_MATRIX,
 	
 	//Lighting capabilities
 	LIGHT_POS,

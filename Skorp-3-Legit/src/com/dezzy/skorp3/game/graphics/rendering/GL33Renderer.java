@@ -1,5 +1,13 @@
 package com.dezzy.skorp3.game.graphics.rendering;
 
+import static com.dezzy.skorp3.game.graphics.rendering.shader.ShaderCapability.MATRICES;
+import static com.dezzy.skorp3.game.graphics.rendering.shader.ShaderCapability.TEXTURES;
+import static com.dezzy.skorp3.game.graphics.rendering.shader.ShaderCapability.VERTICES;
+import static com.dezzy.skorp3.game.graphics.rendering.shader.ShaderSubCapability.MODEL_MATRIX;
+import static com.dezzy.skorp3.game.graphics.rendering.shader.ShaderSubCapability.MVP_MATRIX;
+import static com.dezzy.skorp3.game.graphics.rendering.shader.ShaderSubCapability.VIEW_MATRIX;
+
+import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -7,12 +15,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 
+import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL33;
 import org.lwjgl.system.MemoryStack;
 
 import com.dezzy.skorp3.game.graphics.Texture;
 import com.dezzy.skorp3.game.graphics.geometry.Triangle;
 import com.dezzy.skorp3.game.graphics.geometry.composite.Mesh;
+import com.dezzy.skorp3.game.graphics.rendering.shader.ShaderPair;
+import com.dezzy.skorp3.game.graphics.utils.ShaderUtils;
 import com.dezzy.skorp3.game.math.Mat4;
 import com.dezzy.skorp3.game.math.Vec4;
 import com.dezzy.skorp3.logging.Logger;
@@ -32,14 +43,8 @@ public final class GL33Renderer extends DesignatedCaller {
 	 */
 	private final MessageHandler internalPipe;
 	private static final String INTERNAL_PIPE_NAME = GL33Renderer.class.getName() + " Internal Message Pipe";
-	/**
-	 * Path to the vertex shader, which must be written in GLSL version 3.3
-	 */
-	private final String vertShaderPath;
-	/**
-	 * Path to the fragment shader, which must be written in GLSL version 3.3
-	 */
-	private final String fragShaderPath;
+	
+	private final ShaderPair shaders;
 	
 	private int vaoID;
 	private final Map<Mesh, Renderable> renderables = new HashMap<Mesh, Renderable>();
@@ -49,19 +54,36 @@ public final class GL33Renderer extends DesignatedCaller {
 	private Texture[] textures;
 	private int[] textureIDs;
 	
-	public GL33Renderer(final String _vertShaderPath, final String _fragShaderPath) {
+	public GL33Renderer(final ShaderPair _shaders) {
 		super(new ArrayBlockingQueue<CallTask>(20));
+		shaders = _shaders;
 		
 		internalPipe = MessageHandler.createHandler(INTERNAL_PIPE_NAME);
 		internalPipe.registerCallback(this::handleInternalMessages, this);
-		
-		vertShaderPath = _vertShaderPath;
-		fragShaderPath = _fragShaderPath;
 	}
 	
 	@Override
 	protected void runOtherTasks() {
 		
+	}
+	
+	private void initialize() {
+		createGLProgram();
+		createAndBindVAO();
+	}
+	
+	private void createAndBindVAO() {		
+		try (MemoryStack stack = MemoryStack.stackPush()) {
+			IntBuffer id = stack.mallocInt(1);
+			GL33.glGenVertexArrays(id);
+			vaoID = id.get(0);
+		}
+		GL33.glBindVertexArray(vaoID);
+	}
+	
+	private void createGLProgram() {
+		programID = ShaderUtils.createGLProgram(shaders);
+		shaders.getFieldPointers(programID);
 	}
 	
 	@Sends("setMatricesFor")
@@ -105,14 +127,46 @@ public final class GL33Renderer extends DesignatedCaller {
 		private float[] normals;
 		private Triangle[] triangles;
 		
+		private final FloatBuffer modelMatrixBuffer = BufferUtils.createFloatBuffer(16);
+		
 		public Renderable() {
-			vboID = createVBO();
-			uvBuffer = createUVBuffer();
-			normalBuffer = createNormalBuffer();
+			
+			if (shaders.isCapableOf(VERTICES)) {
+				vboID = createVBO();
+				normalBuffer = createNormalBuffer();
+			}
+			
+			if (shaders.isCapableOf(TEXTURES)) {
+				uvBuffer = createUVBuffer();
+			}
 		}
 		
 		private void setMatrices(final Mat4 model, final Mat4 view, final Mat4 MVP) {
-			
+			if (shaders.isCapableOf(MATRICES)) {
+				if (shaders.isCapableOf(MODEL_MATRIX)) {
+					
+				} else {
+					Logger.error(unsupported(MODEL_MATRIX));
+				}
+				
+				if (shaders.isCapableOf(VIEW_MATRIX)) {
+					
+				} else {
+					Logger.error(unsupported(VIEW_MATRIX));
+				}
+				
+				if (shaders.isCapableOf(MVP_MATRIX)) {
+					
+				} else {
+					Logger.error(unsupported(MVP_MATRIX));
+				}
+			} else {
+				Logger.error(unsupported(MATRICES));
+			}
+		}
+		
+		private String unsupported(final Enum<?> cap) {
+			return shaders.toString() + " does not support " + cap.name();
 		}
 		
 		private void sendTriangleInfo(final Mesh mesh) {

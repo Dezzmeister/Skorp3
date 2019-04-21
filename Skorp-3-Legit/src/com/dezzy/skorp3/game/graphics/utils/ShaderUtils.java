@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import org.lwjgl.opengl.GL33;
 import org.lwjgl.system.MemoryStack;
 
+import com.dezzy.skorp3.game.graphics.rendering.shader.ShaderPair;
 import com.dezzy.skorp3.logging.Logger;
 
 /**
@@ -102,6 +103,27 @@ public class ShaderUtils {
 			GL33.glDetachShader(programID, shaderID);
 			GL33.glDeleteShader(shaderID);
 		});
+		
+		return programID;
+	}
+	
+	/**
+	 * Creates a new GL Program from the given shader pair. Returns the program ID.
+	 * 
+	 * @param shaders vertex and fragment shader
+	 * @return program ID
+	 */
+	public static int createGLProgram(final ShaderPair shaders) {
+		int programID = -1;
+		
+		try {
+			int vertShader = shaders.loadVertexShader();
+			int fragShader = shaders.loadFragmentShader();
+			
+			programID = ShaderUtils.createProgramAndLinkShaders(vertShader, fragShader);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		
 		return programID;
 	}
