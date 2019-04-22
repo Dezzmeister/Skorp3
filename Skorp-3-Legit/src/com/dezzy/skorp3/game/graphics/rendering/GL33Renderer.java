@@ -121,6 +121,7 @@ public final class GL33Renderer extends DesignatedCaller {
 		private int normalBuffer;
 		
 		private float[] vertices;
+		private float[] colors;
 		private float[] uvVertices;
 		private float[] normals;
 		private Triangle[] triangles;
@@ -192,6 +193,7 @@ public final class GL33Renderer extends DesignatedCaller {
 			
 			textureIDs = new int[triangles.length];
 			vertices = new float[triangles.length * 9];
+			colors = new float[triangles.length * 9];
 			uvVertices = new float[triangles.length * 6];
 			
 			int freeImageUnit = findNewImageUnit();
@@ -217,6 +219,18 @@ public final class GL33Renderer extends DesignatedCaller {
 				vertices[offset + 6] = t.v2.x;
 				vertices[offset + 7] = t.v2.y;
 				vertices[offset + 8] = t.v2.z;
+				
+				colors[offset] = t.v0c.x;
+				colors[offset + 1] = t.v0c.y;
+				colors[offset + 2] = t.v0c.z;
+				
+				colors[offset + 3] = t.v1c.x;
+				colors[offset + 4] = t.v1c.y;
+				colors[offset + 5] = t.v1c.z;
+				
+				colors[offset + 6] = t.v2c.x;
+				colors[offset + 7] = t.v2c.y;
+				colors[offset + 8] = t.v2c.z;
 				
 				offset = i * 6;
 				uvVertices[offset] = t.uv0.x;

@@ -11,13 +11,13 @@ public class Triangle {
 	
 	public Vec4 normal;
 	
-	public Vec4 v0c;
-	public Vec4 v1c;
-	public Vec4 v2c;
+	public Vec4 v0c = new Vec4(0, 0, 0);
+	public Vec4 v1c = new Vec4(0, 0, 0);
+	public Vec4 v2c = new Vec4(0, 0, 0);
 	
-	public Vec2 uv0;
-	public Vec2 uv1;
-	public Vec2 uv2;
+	public Vec2 uv0 = new Vec2(0, 0);
+	public Vec2 uv1 = new Vec2(0, 0);
+	public Vec2 uv2 = new Vec2(0, 0);
 	
 	public Texture tex;
 	
